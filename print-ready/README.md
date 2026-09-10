@@ -13,6 +13,8 @@ away so the base is open for the light and the pole.
 
 | file | pose | footprint | needs support | notes |
 |---|---|---|---|---|
+| `keychain-bear-r4b-TRELLIS-32mm-side.stl` | **keychain**: the recommended bear at 20 % (32 mm, 41 mm with the loop), 4.5 mm hole / **3.0 mm** tube, hole facing sideways so the chain runs across the shoulders | 19 x 17 mm | n/a | print SOLID, no supports. Ring section 14 mm2, about twice the 2.2 mm version |
+| `keychain-bear-r4b-TRELLIS-32mm-front.stl` | same, hole facing front (hangs as a pendant) | 19 x 17 mm | n/a | same ring |
 | `bear-r4b-TRELLIS-grizzly-roar-on-rock-160mm.stl` | **round 4 bear b via TRELLIS.2 dual-contouring**: carved fur on arms and shoulders, open jaw with tongue and teeth, separate claws, rock plinth | 96 x 86 mm | **3.7 %** | **RECOMMENDED — print this one.** 46k faces so the fur survives the repair |
 | `bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl` | the same bear via Hunyuan3D 2.1 — same pose, smooth surface, no fur | 94 x 71 mm | 3.0 % | superseded by the TRELLIS version above |
 | `bear-r3l-bronze-sky-roar-on-rock-160mm.stl` | round 3, bronze: grizzly anatomy, both arms up roaring at the sky, rock plinth | 82 x 63 mm | 1.90 % | lowest support; smoothed 25k faces; red is the crotch only |
