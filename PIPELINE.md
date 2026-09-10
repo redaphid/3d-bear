@@ -172,7 +172,7 @@ item to `blueprints/stage2_mesh.yaml`, build, run. Vary `octree` (256 → 384 �
   (seed/steps/octree read from each file's own branch of the embedded prompt).
 - `tools/push_assets.py` wraps `comfy assets push` (which crashes on Windows after uploading) and merges the
   leftover `.comfy/assets.lock.<pid>.tmp` into the lock.
-- `python tools/mesh_repair.py <glb> --out <stl> --height 160 --open-base --views` — largest shell → voxel remesh
+- `python tools/mesh_repair.py <glb> --out <stl> --height 160 --open-base --pitch 0.4 --iso 0.7 --faces 25000 --smooth --fill-legs hull --views` (the measured recipe, `outputs/stage3_print/quality/report.md`) — largest shell → voxel remesh
   → manifold validation → 12k faces → base cut. Hole-filling cannot repair Hunyuan output (non-manifold
   marching-cubes edges); the voxel remesh is watertight by construction. `--height` is the printed height.
 - `tools/mesh_views.py` (six views, red = needs support), `tools/mesh_batch.py` / `mesh_index.py` (per-directory
