@@ -146,3 +146,30 @@ yarn-error.log*
 !**/.yarn/plugins/
 !**/.yarn/releases/
 !**/.yarn/sdks/
+
+# Third-party models — downloaded meshes whose licenses forbid redistribution.
+# Anything in here may be printed locally but must never be committed or pushed:
+# this repo is MIT and public, and that is not ours to grant.
+vendor/
+third-party/
+
+# Slicer output. Machine-specific, large, regenerable.
+*.gcode
+*.gcode.3mf
+
+# ComfyUI pipeline: generated outputs are regenerable and large. Keep only the
+# contact sheets and their item manifests so a reviewer can see what was picked.
+outputs/**
+!outputs/**/
+!outputs/**/sheet*.png
+!outputs/**/items.json
+
+# comfy CLI machine-owned state (asset push lock, run journal) and build artifacts.
+# *.compiled.json is what `tools/build.py` emits from blueprints/*.yaml — rebuild, don't commit.
+.comfy/
+*.compiled.json
+*.compiled.*.json
+
+# Python
+__pycache__/
+*.pyc

@@ -1,0 +1,35 @@
+output_prefix: outputs/ref
+foreach:
+  - {id: a, seed: 101, view: "three-quarter front view, angled slightly to the left"}
+  - {id: b, seed: 202, view: "three-quarter front view, angled slightly to the right"}
+  - {id: c, seed: 303, view: "near-frontal view, very slightly turned"}
+  - {id: d, seed: 404, view: "three-quarter front view, camera at chest height"}
+pipeline:
+  - fragment: t2i_qwen
+    alias: ref
+    params:
+      clip_text_encode_positive_prompt_text: >-
+        A full body grizzly bear rearing up on its hind legs, both forelegs
+        raised and spread wide, head up, mouth open roaring. $item.view
+        The entire animal is fully visible from head to paws with generous
+        empty margin on all sides, nothing cropped or touching the frame edge.
+        Rendered as a matte clay maquette sculpture: smooth simplified
+        sculptural forms, soft rounded volumes, no fur texture, no hair strands,
+        uniform light grey clay material, completely non-reflective matte surface.
+        Flat plain uniform mid-grey studio background, empty, seamless, no scene,
+        no environment, no floor line, no horizon. Perfectly even flat diffuse
+        ambient lighting from all directions, shadowless, no cast shadow,
+        no drop shadow, no contact shadow, no dark areas, very low contrast,
+        soft uniform illumination. Clean product photography of a sculpture.
+      clip_text_encode_negative_prompt_text: >-
+        cast shadow, drop shadow, hard shadow, dark shadows, high contrast,
+        dramatic lighting, rim light, spotlight, glossy, shiny, specular
+        highlights, wet, detailed fur, fur texture, hair strands, realistic pelt,
+        forest, trees, rocks, grass, ground, floor, scenery, background scene,
+        environment, cropped, cut off, out of frame, close-up, partial body,
+        head only, portrait crop, multiple bears, text, watermark, blurry,
+        low quality, deformed, extra limbs
+      ksampler_seed: $item.seed
+      emptysd3latentimage_width: 1024
+      emptysd3latentimage_height: 1024
+      load_lora_lora_name: "Qwen-Image-Lightning-4steps-V1.0.safetensors"

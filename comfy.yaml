@@ -1,0 +1,35 @@
+schema: project/1
+defaults:
+  where: local
+
+# Shared constants referenced from blueprints as $var.<name>.
+# Stage 1 (reference images for image-to-3D): see HANDOFF.md.
+vars:
+  steps: 20
+  cfg: 4
+  size: 896
+
+  subject: >-
+    A matte clay maquette sculpture of a full-body grizzly bear, rearing upright
+    on its hind legs, the entire animal visible from the top of its head down to
+    the soles of its hind paws.
+
+  style: >-
+    Rendered as a matte clay maquette: smooth simplified sculptural forms, soft
+    rounded volumes, no fur texture, no hair strands, uniform light grey clay,
+    completely non-reflective matte surface. The whole bear is centred in the
+    frame with generous empty margin on all sides, nothing cropped, nothing
+    touching the frame edge. Plain flat uniform mid-grey studio background,
+    seamless, empty, no scene, no environment, no floor line, no horizon.
+    Perfectly even flat diffuse shadowless lighting from all directions, no cast
+    shadow, no drop shadow, no contact shadow, no dark areas, very low contrast.
+    Clean product photograph of a sculpture.
+
+  negative: >-
+    cast shadow, drop shadow, hard shadow, dark shadows, high contrast, dramatic
+    lighting, rim light, spotlight, glossy, shiny, specular highlights, wet,
+    detailed fur, fur texture, hair strands, realistic pelt, forest, trees,
+    rocks, grass, ground, floor, scenery, background scene, environment,
+    cropped, cut off, out of frame, close-up, partial body, head only, portrait
+    crop, multiple bears, two bears, text, watermark, signature, blurry, low
+    quality, deformed, extra limbs, missing limbs, extra heads

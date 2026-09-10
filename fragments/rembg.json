@@ -1,0 +1,19 @@
+{
+  "_fragment": {
+    "name": "rembg",
+    "description": "Strip the background from an image so reconstruction sees only the subject. Hand-authored against the rembg-comfyui-node schema.",
+    "terminal": false,
+    "inputs": {
+      "image": { "type": "IMAGE", "binds": "1.image" }
+    },
+    "outputs": {
+      "image": { "type": "IMAGE", "from": "1", "port": 0 }
+    },
+    "params": {}
+  },
+  "1": {
+    "inputs": { "image": "PLACEHOLDER" },
+    "class_type": "Image Remove Background (rembg)",
+    "_meta": { "title": "Image Remove Background (rembg)" }
+  }
+}

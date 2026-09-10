@@ -1,0 +1,384 @@
+{
+  "_fragment": {
+    "name": "t2i_qwen",
+    "description": "Decomposed from ref_qwen.json (gallery template image_qwen_Image_2512). Positive prompt is the STRING input `prompt` (wire $alias.prompt from prompt_builder, or a literal); negative prompt stays a param. Steps/cfg are driven by primitive nodes: int_steps_value / float_cfg_value (lora disabled path). Edit values as named params in a blueprint and rebuild with `comfy workflow compose` — do not hand-edit the compiled workflow.",
+    "terminal": false,
+    "source": "templates/ref_qwen.json",
+    "inputs": {
+      "prompt": {
+        "type": "STRING",
+        "binds": "6.text"
+      }
+    },
+    "outputs": {
+      "image": {
+        "type": "IMAGE",
+        "from": "8",
+        "port": 0
+      }
+    },
+    "params": {
+      "load_clip_clip_name": {
+        "type": "STRING",
+        "binds": "2.clip_name",
+        "default": "qwen_2.5_vl_7b_fp8_scaled.safetensors"
+      },
+      "load_clip_type": {
+        "type": "STRING",
+        "binds": "2.type",
+        "default": "qwen_image"
+      },
+      "load_clip_device": {
+        "type": "STRING",
+        "binds": "2.device",
+        "default": "default"
+      },
+      "load_vae_vae_name": {
+        "type": "STRING",
+        "binds": "3.vae_name",
+        "default": "qwen_image_vae.safetensors"
+      },
+      "modelsamplingauraflow_shift": {
+        "type": "FLOAT",
+        "binds": "4.shift",
+        "default": 3.1000000000000005
+      },
+      "load_diffusion_model_unet_name": {
+        "type": "STRING",
+        "binds": "5.unet_name",
+        "default": "qwen_image_2512_fp8_e4m3fn.safetensors"
+      },
+      "load_diffusion_model_weight_dtype": {
+        "type": "STRING",
+        "binds": "5.weight_dtype",
+        "default": "default"
+      },
+      "clip_text_encode_negative_prompt_text": {
+        "type": "STRING",
+        "binds": "7.text",
+        "default": "低分辨率，低画质，肢体畸形，手指畸形，画面过饱和，蜡像感，人脸无细节，过度光滑，画面具有AI感。构图混乱。文字模糊，扭曲"
+      },
+      "emptysd3latentimage_width": {
+        "type": "INT",
+        "binds": "9.width",
+        "default": 1328
+      },
+      "emptysd3latentimage_height": {
+        "type": "INT",
+        "binds": "9.height",
+        "default": 1328
+      },
+      "emptysd3latentimage_batch_size": {
+        "type": "INT",
+        "binds": "9.batch_size",
+        "default": 1
+      },
+      "ksampler_seed": {
+        "type": "INT",
+        "binds": "10.seed",
+        "default": 464857551335368
+      },
+      "ksampler_sampler_name": {
+        "type": "STRING",
+        "binds": "10.sampler_name",
+        "default": "euler"
+      },
+      "ksampler_scheduler": {
+        "type": "STRING",
+        "binds": "10.scheduler",
+        "default": "simple"
+      },
+      "ksampler_denoise": {
+        "type": "INT",
+        "binds": "10.denoise",
+        "default": 1
+      },
+      "int_steps_value": {
+        "type": "INT",
+        "binds": "11.value",
+        "default": 50
+      },
+      "float_cfg_value": {
+        "type": "INT",
+        "binds": "12.value",
+        "default": 4
+      },
+      "enable_4_steps_lora_value": {
+        "type": "BOOLEAN",
+        "binds": "13.value",
+        "default": false
+      },
+      "int_steps_value_2": {
+        "type": "INT",
+        "binds": "14.value",
+        "default": 4
+      },
+      "float_cfg_value_2": {
+        "type": "INT",
+        "binds": "15.value",
+        "default": 1
+      },
+      "load_lora_lora_name": {
+        "type": "STRING",
+        "binds": "16.lora_name",
+        "default": "Qwen-Image-2512-Lightning-4steps-V1.0-fp32.safetensors"
+      },
+      "load_lora_strength_model": {
+        "type": "INT",
+        "binds": "16.strength_model",
+        "default": 1
+      }
+    }
+  },
+  "2": {
+    "inputs": {
+      "clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "3": {
+    "inputs": {
+      "vae_name": "qwen_image_vae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "4": {
+    "inputs": {
+      "shift": 3.1000000000000005,
+      "model": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingAuraFlow",
+    "_meta": {
+      "title": "ModelSamplingAuraFlow"
+    }
+  },
+  "5": {
+    "inputs": {
+      "unet_name": "qwen_image_2512_fp8_e4m3fn.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "6": {
+    "inputs": {
+      "text": "PLACEHOLDER",
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "低分辨率，低画质，肢体畸形，手指畸形，画面过饱和，蜡像感，人脸无细节，过度光滑，画面具有AI感。构图混乱。文字模糊，扭曲",
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative Prompt)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "samples": [
+        "10",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "9": {
+    "inputs": {
+      "width": 1328,
+      "height": 1328,
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "EmptySD3LatentImage"
+    }
+  },
+  "10": {
+    "inputs": {
+      "seed": 464857551335368,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "4",
+        0
+      ],
+      "steps": [
+        "18",
+        0
+      ],
+      "cfg": [
+        "19",
+        0
+      ],
+      "positive": [
+        "6",
+        0
+      ],
+      "negative": [
+        "7",
+        0
+      ],
+      "latent_image": [
+        "9",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "11": {
+    "inputs": {
+      "value": 50
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Int (Steps)"
+    }
+  },
+  "12": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "Float (CFG)"
+    }
+  },
+  "13": {
+    "inputs": {
+      "value": false
+    },
+    "class_type": "PrimitiveBoolean",
+    "_meta": {
+      "title": "Enable 4 Steps LoRA?"
+    }
+  },
+  "14": {
+    "inputs": {
+      "value": 4
+    },
+    "class_type": "PrimitiveInt",
+    "_meta": {
+      "title": "Int (Steps)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "PrimitiveFloat",
+    "_meta": {
+      "title": "Float (CFG)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "lora_name": "Qwen-Image-2512-Lightning-4steps-V1.0-fp32.safetensors",
+      "strength_model": 1,
+      "model": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Load LoRA"
+    }
+  },
+  "17": {
+    "inputs": {
+      "switch": [
+        "13",
+        0
+      ],
+      "on_false": [
+        "5",
+        0
+      ],
+      "on_true": [
+        "16",
+        0
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "Switch (model)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "switch": [
+        "13",
+        0
+      ],
+      "on_false": [
+        "11",
+        0
+      ],
+      "on_true": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "Switch (steps)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "switch": [
+        "13",
+        0
+      ],
+      "on_false": [
+        "12",
+        0
+      ],
+      "on_true": [
+        "15",
+        0
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "Switch (cfg)"
+    }
+  }
+}

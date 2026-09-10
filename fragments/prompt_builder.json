@@ -1,0 +1,46 @@
+{
+  "_fragment": {
+    "name": "prompt_builder",
+    "version": "1",
+    "description": "In-graph prompt assembly: joins six STRING params (subject, view, pose, mass, mouth, style) with a single space via a chain of core StringConcatenate nodes and exposes the result as the STRING output `prompt`. Wire `prompt` into a text encoder's STRING input (e.g. t2i_qwen.inputs.prompt).",
+    "terminal": false,
+    "inputs": {},
+    "outputs": {
+      "prompt": {"type": "STRING", "from": "14", "port": 0}
+    },
+    "params": {
+      "subject": {"type": "STRING", "binds": "10.string_a"},
+      "view":    {"type": "STRING", "binds": "10.string_b"},
+      "pose":    {"type": "STRING", "binds": "11.string_b"},
+      "mass":    {"type": "STRING", "binds": "12.string_b"},
+      "mouth":   {"type": "STRING", "binds": "13.string_b"},
+      "style":   {"type": "STRING", "binds": "14.string_b"}
+    }
+  },
+
+  "10": {
+    "class_type": "StringConcatenate",
+    "_meta": {"title": "prompt: subject + view"},
+    "inputs": {"string_a": "PLACEHOLDER", "string_b": "PLACEHOLDER", "delimiter": " "}
+  },
+  "11": {
+    "class_type": "StringConcatenate",
+    "_meta": {"title": "prompt: + pose"},
+    "inputs": {"string_a": ["10", 0], "string_b": "PLACEHOLDER", "delimiter": " "}
+  },
+  "12": {
+    "class_type": "StringConcatenate",
+    "_meta": {"title": "prompt: + mass"},
+    "inputs": {"string_a": ["11", 0], "string_b": "PLACEHOLDER", "delimiter": " "}
+  },
+  "13": {
+    "class_type": "StringConcatenate",
+    "_meta": {"title": "prompt: + mouth"},
+    "inputs": {"string_a": ["12", 0], "string_b": "PLACEHOLDER", "delimiter": " "}
+  },
+  "14": {
+    "class_type": "StringConcatenate",
+    "_meta": {"title": "prompt: + style"},
+    "inputs": {"string_a": ["13", 0], "string_b": "PLACEHOLDER", "delimiter": " "}
+  }
+}
