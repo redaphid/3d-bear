@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phosphor Bear</title>
+<meta name="description" content="A rearing grizzly, generated, reconstructed, repaired and printed hollow to glow from inside. A totem for Goldrush, 12 September 2026.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%230a0d0c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%235df0a3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@100;300;500;700;900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&display=swap">
+<style>
+/* ================================================================
+   tokens: one deliberate world, a blacklit room
+   ================================================================ */
+:root{
+  --bg:#0a0d0c; --bg2:#0d1210; --surface:#131917; --surface2:#182019;
+  --line:#1f2724; --line2:#2b3631; --line3:#3a4741;
+  --text:#e6ece6; --text2:#b6c0b8; --muted:#8b968f;
+  --glow:#c9ffd9; --glow2:#5df0a3; --glow-dim:rgba(93,240,163,.18); --glow-faint:rgba(93,240,163,.07);
+  --red:#e0472c;
+  --display:"Big Shoulders Display","Bahnschrift","Arial Narrow","Roboto Condensed",Impact,sans-serif;
+  --serif:"Newsreader","Iowan Old Style","Palatino Linotype","Book Antiqua",Georgia,serif;
+  --mono:ui-monospace,"Cascadia Mono","SF Mono",Menlo,Consolas,monospace;
+  --gutter:clamp(16px,4vw,64px);
+  --max:1280px; --gap:24px;
+  --col:calc((var(--max) - 11*var(--gap))/12);
+  --u:8px;
+}
+html{color-scheme:dark;background:var(--bg);scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html.still{scroll-behavior:auto}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--serif);font-size:18px;line-height:28px;overflow-x:hidden}
+img{display:block;max-width:100%;height:auto}
+a{color:inherit}
+h1,h2,h3,h4{margin:0;font-family:var(--display);font-weight:700;line-height:1;text-wrap:balance}
+p{margin:0}
+ul,ol{margin:0;padding:0;list-style:none}
+figure{margin:0}
+:focus-visible{outline:2px solid var(--glow2);outline-offset:4px}
+::selection{background:var(--glow2);color:var(--bg)}
+.skip{position:absolute;left:-999px;top:8px;background:var(--glow2);color:var(--bg);padding:8px 16px;font-family:var(--mono);font-size:13px;z-index:100}
+.skip:focus{left:8px}
+section,[id]{scroll-margin-top:56px}
+code{font-family:var(--mono);font-size:.86em;color:var(--glow);background:var(--surface);padding:1px 6px;border-radius:2px}
+
+/* ================================================================
+   the magazine grid: 12 content columns with bleed columns either side
+   items place themselves on named lines: c 1 … c 12, full, content
+   ================================================================ */
+.mag{display:grid;grid-template-columns:[full-start] minmax(var(--gutter),1fr) [content-start] repeat(12,[c] minmax(0,var(--col))) [content-end] minmax(var(--gutter),1fr) [full-end];column-gap:var(--gap);row-gap:0;align-items:start}
+.mag > *{grid-column:content;min-width:0}
+.full{grid-column:full}
+.a1{grid-column-start:c 1}.a2{grid-column-start:c 2}.a3{grid-column-start:c 3}.a4{grid-column-start:c 4}.a5{grid-column-start:c 5}.a6{grid-column-start:c 6}
+.a7{grid-column-start:c 7}.a8{grid-column-start:c 8}.a9{grid-column-start:c 9}.a10{grid-column-start:c 10}.a11{grid-column-start:c 11}.a12{grid-column-start:c 12}
+.w2{grid-column-end:span 2}.w3{grid-column-end:span 3}.w4{grid-column-end:span 4}.w5{grid-column-end:span 5}.w6{grid-column-end:span 6}
+.w7{grid-column-end:span 7}.w8{grid-column-end:span 8}.w9{grid-column-end:span 9}.w10{grid-column-end:span 10}.w11{grid-column-end:span 11}.w12{grid-column-end:span 12}
+.bleed-r{grid-column-end:full-end}
+.bleed-l{grid-column-start:full-start}
+.r1{grid-row:1}.r2{grid-row:2}.r3{grid-row:3}.r4{grid-row:4}.r5{grid-row:5}.r6{grid-row:6}
+.r12{grid-row:1/span 2}.r13{grid-row:1/span 3}.r14{grid-row:1/span 4}.r23{grid-row:2/span 2}.r24{grid-row:2/span 3}.r34{grid-row:3/span 2}
+.z1{z-index:1}.z2{z-index:2}.z3{z-index:3}
+.mag{position:relative}
+.rail{position:absolute;left:calc(var(--gutter)/2 - 8px);top:0;writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--glow2);white-space:nowrap;margin:0}
+.pad{padding-block:calc(var(--u)*12)}
+.band{background:var(--bg2);border-block:1px solid var(--line)}
+.sp{height:calc(var(--u)*8)}
+.sp-l{height:calc(var(--u)*14)}
+
+/* ================================================================
+   type
+   ================================================================ */
+.mono{font-family:var(--mono);font-size:13px;line-height:20px;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:12px;line-height:16px;letter-spacing:.2em;text-transform:uppercase;color:var(--glow2)}
+.small{font-size:15px;line-height:24px;color:var(--text2)}
+.prose{max-width:66ch}
+.prose p+p{margin-top:16px}
+.prose strong{font-weight:500;color:var(--glow)}
+.lede{font-size:22px;line-height:32px;font-weight:300;color:var(--text2)}
+.lede strong{color:var(--text);font-weight:500}
+.dc::first-letter{font-family:var(--display);font-weight:900;font-size:5.4em;line-height:.78;float:left;padding:.1em .14em 0 0;color:var(--glow);text-shadow:0 0 22px rgba(93,240,163,.5)}
+.d9{font-family:var(--display);font-weight:900;text-transform:uppercase;line-height:.86;letter-spacing:.005em}
+.d7{font-family:var(--display);font-weight:700;text-transform:uppercase;line-height:.9;letter-spacing:.01em}
+.d3{font-family:var(--display);font-weight:300;text-transform:uppercase;line-height:.9;letter-spacing:.02em}
+.d1{font-family:var(--display);font-weight:100;text-transform:uppercase;line-height:.9;letter-spacing:.03em}
+.it{font-family:var(--serif);font-style:italic;font-weight:300;text-transform:none;letter-spacing:0}
+.lit{color:var(--glow);text-shadow:0 0 24px rgba(93,240,163,.55),0 0 80px rgba(93,240,163,.3)}
+.ghost{color:var(--line3)}
+@supports ((-webkit-text-stroke:1px #000) or (text-stroke:1px #000)){
+  .ghost{color:transparent;-webkit-text-stroke:1.5px var(--line3)}
+  .ghost.red{-webkit-text-stroke:2px var(--red)}
+}
+.h-xl{font-size:clamp(64px,11vw,168px)}
+.h-l{font-size:clamp(48px,7.5vw,112px)}
+.h-m{font-size:clamp(32px,4.2vw,60px)}
+.n-xxl{font-size:clamp(140px,26vw,400px);line-height:.78}
+.vert{writing-mode:vertical-rl;transform:rotate(180deg)}
+.stamp{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:900;font-size:clamp(28px,4vw,56px);text-transform:uppercase;letter-spacing:.06em;color:var(--red);transform:rotate(-14deg);text-shadow:0 0 14px rgba(224,71,44,.5);pointer-events:none}
+.pull{border-left:2px solid var(--glow2);padding-left:24px;font-family:var(--serif);font-size:clamp(28px,3.6vw,46px);line-height:1.15;font-weight:300;font-style:italic;color:var(--text);text-wrap:balance}
+.pull small{display:block;margin-top:14px;font-style:normal;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+/* floats: text runs around the bear's silhouette */
+.fl{float:left;width:46%;max-width:420px;shape-margin:22px;margin:8px 8px 8px -6%;filter:drop-shadow(0 0 16px rgba(93,240,163,.25))}
+.fr{float:right;width:46%;max-width:420px;shape-margin:22px;margin:8px -6% 8px 8px;filter:drop-shadow(0 0 16px rgba(93,240,163,.25))}
+.clear::after{content:"";display:block;clear:both}
+
+/* ================================================================
+   top bar + progress line
+   ================================================================ */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(10,13,12,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topbar .in{display:flex;align-items:center;justify-content:space-between;height:56px;gap:16px;max-width:var(--max);margin-inline:auto;padding-inline:var(--gutter)}
+.brand{font-family:var(--display);font-weight:900;font-size:22px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--glow2);box-shadow:0 0 12px var(--glow2)}
+.nav{display:flex;gap:24px;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.nav a{text-decoration:none;color:var(--muted);padding:4px 0;border-bottom:1px solid transparent;white-space:nowrap}
+.nav a:hover,.nav a.is-active{color:var(--glow);border-bottom-color:var(--glow2)}
+.nav b{color:var(--glow2);font-weight:400;margin-right:6px}
+.progress{position:fixed;top:0;left:0;height:2px;width:100%;background:var(--glow2);box-shadow:0 0 10px var(--glow2);transform-origin:0 50%;transform:scaleX(0);z-index:60}
+
+/* ================================================================
+   cover: masthead layered with the bear
+   ================================================================ */
+.cover{padding-block:calc(var(--u)*5) calc(var(--u)*8);grid-template-rows:auto auto auto auto auto}
+.cover .issue{grid-row:1;display:flex;justify-content:space-between;gap:16px;padding-bottom:calc(var(--u)*4);color:var(--muted)}
+.cover .issue b{color:var(--glow2);font-weight:400}
+.cover .l1{grid-row:2;grid-column:c 1/span 12;z-index:1;font-size:clamp(84px,15.4vw,226px)}
+.cover .l2{grid-row:3;grid-column:c 1/span 12;z-index:3;font-size:clamp(84px,15.4vw,226px)}
+.cover .bear{grid-row:2/span 3;grid-column:c 7/span 6;z-index:2;position:relative;align-self:stretch;min-height:320px}
+.cover .bear::before{content:"";position:absolute;inset:6% 12%;border-radius:50%;background:radial-gradient(circle at 50% 50%,rgba(93,240,163,.42),rgba(93,240,163,.10) 45%,rgba(93,240,163,0) 70%);filter:blur(30px)}
+.cover .bear img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;filter:drop-shadow(0 0 18px rgba(93,240,163,.45)) drop-shadow(0 0 64px rgba(93,240,163,.25))}
+.cover .bear::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 34% 40% at 52% 52%,rgba(201,255,217,.95),rgba(93,240,163,.55) 45%,rgba(93,240,163,0) 100%);mix-blend-mode:screen;-webkit-mask:url(img/hero-c-cutout.png) center/contain no-repeat;mask:url(img/hero-c-cutout.png) center/contain no-repeat;animation:breathe 5s ease-in-out infinite alternate}
+@keyframes breathe{from{opacity:.55}to{opacity:1}}
+.cover .dek{grid-row:4;grid-column:c 1/span 6;margin-top:calc(var(--u)*4);font-size:clamp(20px,2.2vw,27px);line-height:1.3;font-weight:300;color:var(--text2);max-width:26ch}
+.cover .dek strong{font-weight:500;color:var(--text)}
+.cover .lines{grid-row:5;grid-column:c 8/span 5;margin-top:calc(var(--u)*4);display:grid;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.cover .lines a{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:baseline;text-decoration:none;color:var(--text2);font-size:16px}
+.cover .lines a:hover{color:var(--glow)}
+.cover .lines b{font-family:var(--display);font-weight:900;font-size:22px;color:var(--glow2)}
+.cover .lines span{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cover .meta{grid-row:5;grid-column:c 1/span 6;margin-top:calc(var(--u)*4);display:flex;flex-wrap:wrap;gap:8px 22px;color:var(--muted)}
+.cover .meta span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--glow2);margin-right:10px;vertical-align:2px;box-shadow:0 0 8px var(--glow2)}
+
+/* contents strip */
+.toc{border-block:1px solid var(--line)}
+.toc ol{display:grid;grid-template-columns:repeat(4,1fr)}
+.toc li{border-right:1px solid var(--line)}
+.toc li:last-child{border-right:0}
+.toc a{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center;padding:16px 16px 16px 0;text-decoration:none;color:var(--text2)}
+.toc a:hover{color:var(--glow)}
+.toc img{width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(93,240,163,.3))}
+.toc b{display:block;font-family:var(--display);font-weight:900;font-size:34px;line-height:1;color:var(--glow2)}
+.toc small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-top:4px}
+
+/* ================================================================
+   figures
+   ================================================================ */
+.frame{background:var(--surface);border:1px solid var(--line);overflow:hidden;position:relative}
+.frame img{width:100%;height:auto}
+.plate .frame{border-color:var(--line2)}
+.plate img{filter:brightness(.94)}
+figcaption{font-family:var(--mono);font-size:13px;line-height:20px;color:var(--muted);display:flex;gap:12px;align-items:baseline;margin-top:10px}
+figcaption b{color:var(--glow2);font-weight:400;flex:none}
+figcaption .r{margin-left:auto;color:var(--text2);white-space:nowrap}
+.tag{position:absolute;left:12px;bottom:8px;font-family:var(--display);font-weight:900;font-size:clamp(40px,5vw,72px);line-height:1;color:var(--glow2);text-shadow:0 0 14px rgba(93,240,163,.6),0 2px 0 rgba(0,0,0,.4)}
+
+/* the alphabet mosaic: dense grid, big tiles turned as asked, small tiles frontal */
+.mosaic{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:minmax(0,1fr);grid-auto-flow:dense;gap:4px;background:var(--line);border-block:1px solid var(--line)}
+.mosaic .tile{position:relative;background:var(--surface);overflow:hidden;aspect-ratio:1}
+.mosaic .tile img{width:100%;height:100%;object-fit:cover}
+.mosaic .big{grid-column:span 2;grid-row:span 2}
+.mosaic .no img,.mosaic .asked img{filter:grayscale(1) brightness(.5)}
+.mosaic .tile b{position:absolute;left:10px;bottom:4px;font-family:var(--display);font-weight:900;font-size:clamp(36px,5vw,80px);line-height:1;color:var(--glow2);text-shadow:0 0 14px rgba(93,240,163,.6),0 2px 0 rgba(0,0,0,.5)}
+.mosaic .no b,.mosaic .asked b{color:var(--muted);text-shadow:none;font-size:clamp(24px,3vw,40px)}
+.mosaic .tile span{position:absolute;right:10px;bottom:12px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text);background:rgba(10,13,12,.6);padding:3px 6px}
+.mosaic .no span,.mosaic .asked span{color:var(--muted)}
+.mosaic .asked .stamp{color:var(--muted);text-shadow:none;font-size:clamp(18px,2.4vw,30px)}
+.mosaic .no .stamp{font-size:clamp(18px,2.6vw,34px)}
+.mosaic .edge img{filter:grayscale(.6) brightness(.75)}
+.mosaic .edge b{color:var(--text2);text-shadow:none}
+.mosaic .edge .stamp{color:var(--text2);text-shadow:none;font-size:clamp(18px,2.4vw,30px)}
+.mosaic .legend{grid-column:span 2;grid-row:span 2;aspect-ratio:auto;display:grid;align-content:end;gap:10px;padding:24px;font-family:var(--mono);font-size:12px;line-height:18px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--bg2)}
+.mosaic .legend b{color:var(--glow2);font-weight:400}
+.mosaic .legend i{color:var(--red);font-style:normal}
+
+/* the lineup: all twenty cutouts, roster letters beneath */
+.lineup{display:grid;grid-template-columns:repeat(10,1fr);gap:0;background:radial-gradient(ellipse 80% 40% at 50% 100%,var(--glow-faint),transparent 70%),var(--bg2);border-block:1px solid var(--line);padding:calc(var(--u)*4) var(--gutter) calc(var(--u)*2)}
+.lineup figure{display:grid;gap:0;justify-items:center}
+.lineup img{width:100%;height:auto;filter:drop-shadow(0 0 10px rgba(93,240,163,.22))}
+.lineup b{font-family:var(--display);font-weight:900;font-size:clamp(24px,3vw,44px);line-height:1;color:var(--glow2);margin-top:-6px}
+.lineup .no b{color:var(--muted);font-weight:300}
+
+/* twenty mesh plates */
+.meshes{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap) var(--gap)}
+.meshes figure{position:relative}
+.meshes .tag{left:auto;right:10px;bottom:auto;top:2px;font-size:clamp(36px,4vw,60px);color:var(--red);text-shadow:0 0 12px rgba(224,71,44,.4)}
+
+/* the sweep: seven plates and a verdict tile */
+.sweep{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap)}
+.sweep .verdict{display:grid;align-content:center;align-self:stretch;gap:8px;padding:24px;background:var(--surface);border:1px solid var(--line2);min-width:0}
+.sweep .verdict b{font-family:var(--display);font-weight:900;font-size:clamp(36px,4vw,64px);line-height:.9;text-transform:uppercase;color:var(--glow)}
+.sweep .verdict p{font-size:14px;line-height:20px;color:var(--text2)}
+
+/* print previews: named areas */
+.prints{display:grid;grid-template-columns:repeat(4,1fr);grid-template-areas:"c c o k" "c c m d";gap:var(--gap)}
+.prints .pc{grid-area:c}.prints .po{grid-area:o}.prints .pk{grid-area:k}.prints .pm{grid-area:m}.prints .pd{grid-area:d}
+.prints figure{position:relative}
+.prints .pct{position:absolute;right:12px;top:8px;font-family:var(--display);font-weight:900;font-size:clamp(40px,5vw,84px);line-height:1;color:var(--glow2);text-shadow:0 0 14px rgba(93,240,163,.5),0 2px 0 rgba(0,0,0,.4)}
+.prints .pct i{font-style:normal;font-size:.5em;color:var(--red)}
+.prints .pc .pct{color:var(--glow);font-size:clamp(64px,8vw,132px)}
+
+/* stat tiles */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);background:var(--surface)}
+.stats div{padding:24px;border-right:1px solid var(--line)}
+.stats div:last-child{border-right:0}
+.stats b{display:block;font-family:var(--display);font-weight:700;font-size:56px;line-height:52px;color:var(--text);font-variant-numeric:tabular-nums}
+.stats b i{font-style:normal;color:var(--glow2);font-size:.6em}
+.stats span{display:block;margin-top:8px;font-family:var(--mono);font-size:12px;line-height:18px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.stats .hot b{color:var(--glow);text-shadow:0 0 18px rgba(93,240,163,.4)}
+
+/* big-number compositions */
+.bignum{font-family:var(--display);font-weight:900;line-height:.8;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.bignum i{font-style:normal;font-family:var(--serif);font-weight:300;font-style:italic;font-size:.28em;color:var(--muted);letter-spacing:0;vertical-align:.35em;margin-left:.1em}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+/* the wall */
+.wall{background:radial-gradient(ellipse 50% 40% at 25% 40%,rgba(224,71,44,.12),transparent 70%),var(--bg2);border-block:1px solid var(--line)}
+.wall .prose strong{color:var(--red)}
+.wallword{font-size:clamp(120px,22vw,340px);line-height:.75;padding-top:.2em;pointer-events:none;justify-self:start}
+
+/* tables */
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px;line-height:22px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:12px 16px 12px 0;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:400}
+td.n,th.n{text-align:right;padding-left:16px;padding-right:24px;font-family:var(--mono);font-size:14px;white-space:nowrap}
+td.hot{color:var(--glow)}
+td:first-child{white-space:nowrap}
+tr.rec td{color:var(--text)}
+tr.rec td:first-child::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--glow2);box-shadow:0 0 8px var(--glow2);margin-right:10px;vertical-align:2px}
+td a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--line2)}
+td a:hover{color:var(--glow);border-bottom-color:var(--glow2)}
+
+/* download button */
+.btn{display:inline-flex;align-items:center;gap:14px;background:var(--glow2);color:var(--bg);text-decoration:none;font-family:var(--display);font-weight:900;font-size:26px;letter-spacing:.06em;text-transform:uppercase;padding:18px 28px;box-shadow:0 0 24px rgba(93,240,163,.45),0 0 72px rgba(93,240,163,.2);transition:box-shadow .2s,transform .2s}
+.btn:hover{box-shadow:0 0 36px rgba(93,240,163,.7),0 0 110px rgba(93,240,163,.3);transform:translateY(-1px)}
+.btn span{display:flex;flex-direction:column;gap:4px;white-space:nowrap;line-height:1}
+.btn small{font-family:var(--mono);font-weight:400;font-size:12px;letter-spacing:.1em;opacity:.8}
+.btn svg{width:22px;height:22px;flex:none}
+
+/* flow diagram + zigzag principles */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gap);counter-reset:st}
+.flow > li{position:relative;padding:24px;background:var(--surface);border:1px solid var(--line)}
+.flow > li::before{counter-increment:st;content:"0" counter(st);font-family:var(--display);font-weight:900;font-size:40px;line-height:1;color:var(--glow2)}
+.flow > li::after{content:"";position:absolute;right:calc(var(--gap)*-1);top:44px;width:var(--gap);height:1px;background:var(--glow2);box-shadow:0 0 6px var(--glow2)}
+.flow > li:last-child::after{display:none}
+.flow h4{font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-top:8px}
+.flow p{margin-top:8px;font-size:15px;line-height:22px;color:var(--text2)}
+.flow ul{margin-top:12px;font-family:var(--mono);font-size:12px;line-height:20px;color:var(--muted)}
+.flow ul li{position:relative;padding-left:12px}
+.flow ul li::before{content:"";position:absolute;left:0;top:9px;width:4px;height:1px;background:var(--glow2)}
+.zig{border-top:1px solid var(--line)}
+.zig > li{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gap);padding-block:calc(var(--u)*4);border-bottom:1px solid var(--line);align-items:start}
+.zig h4{grid-column:1/span 6;font-size:clamp(32px,4.4vw,64px);font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:.01em}
+.zig h4 em{font-style:normal;font-weight:100;color:var(--glow)}
+.zig p{grid-column:8/span 5;font-size:16px;line-height:25px;color:var(--text2)}
+.zig > li:nth-child(even) h4{grid-column:7/span 6;text-align:right;grid-row:1}
+.zig > li:nth-child(even) p{grid-column:1/span 5;grid-row:1}
+
+/* the night: a staircase of numbers */
+.night > li{position:relative;padding-top:20px;border-top:1px solid var(--line2)}
+.night > li::before{content:"";position:absolute;left:0;top:-4px;width:7px;height:7px;border-radius:50%;background:var(--glow2);box-shadow:0 0 10px var(--glow2)}
+.night b{display:block;font-family:var(--display);font-weight:900;font-size:clamp(56px,7vw,104px);line-height:.85;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.night b i{font-style:normal;color:var(--glow2);font-size:.5em}
+.night h4{font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-top:12px;color:var(--text2)}
+.night p{margin-top:8px;font-size:15px;line-height:22px;color:var(--text2)}
+.night .n1{grid-column:c 1/span 4;grid-row:1}
+.night .n2{grid-column:c 4/span 4;grid-row:2;margin-top:calc(var(--u)*5)}
+.night .n3{grid-column:c 7/span 4;grid-row:3;margin-top:calc(var(--u)*5)}
+.night .n4{grid-column:c 9/span 4;grid-row:4;margin-top:calc(var(--u)*5)}
+
+/* colophon */
+.colophon{border-top:1px solid var(--line);padding-block:calc(var(--u)*8) calc(var(--u)*10);color:var(--text2);font-size:15px;line-height:24px}
+.colophon dl{display:grid;grid-template-columns:auto 1fr;gap:6px 20px;margin:0}
+.colophon dt{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding-top:4px}
+.colophon dd{margin:0}
+.colophon a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--line2)}
+.colophon a:hover{color:var(--glow);border-bottom-color:var(--glow2)}
+.sig{font-family:var(--display);font-weight:900;font-size:64px;line-height:.9;text-transform:uppercase;color:var(--glow);text-shadow:0 0 30px rgba(93,240,163,.4)}
+
+/* ================================================================
+   motion: a settle on entry, never a hide; off for reduced motion
+   ================================================================ */
+@media (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:view()){
+    html:not(.still) .rv{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 35%}
+    @keyframes rise{from{opacity:.55;transform:translateY(24px)}to{opacity:1;transform:none}}
+  }
+  @supports (animation-timeline:scroll()){
+    .progress{animation:grow linear both;animation-timeline:scroll(root)}
+    @keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .cover .bear::after{animation:none;opacity:.85}
+  .btn{transition:none}
+}
+
+/* ================================================================
+   narrower screens
+   ================================================================ */
+@media (max-width:1000px){
+  .rail{display:none}
+  .flow{grid-template-columns:repeat(2,1fr)}
+  .flow > li:nth-child(2)::after{display:none}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .stats div:nth-child(2){border-right:0}
+  .stats div:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .meshes{grid-template-columns:repeat(3,1fr)}
+  .sweep{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:720px){
+  :root{--gap:12px}
+  body{font-size:17px;line-height:26px}
+  .pad{padding-block:calc(var(--u)*8)}
+  .sp-l{height:calc(var(--u)*8)}
+  .mag > [class*="w"],.mag > [class*="a"]{grid-column:content}
+  .mag > .r1,.mag > .r2,.mag > .r3,.mag > .r4,.mag > .r12,.mag > .r13,.mag > .r14,.mag > .r23,.mag > .r24,.mag > .r34{grid-row:auto}
+  .bignum{font-size:clamp(96px,28vw,140px)!important}
+  .n-xxl{font-size:clamp(120px,36vw,180px)!important}
+  .mag > .full{grid-column:full}
+  .mag > .half{grid-column:c 1/span 6}
+  .mag > .half2{grid-column:c 7/span 6}
+  .cover .l1,.cover .l2{grid-column:c 1/span 12;font-size:clamp(72px,19vw,110px)}
+  .cover .bear{grid-row:4;grid-column:c 1/span 12;min-height:0;aspect-ratio:1;max-width:420px;width:100%;justify-self:center;margin-top:16px}
+  .cover .dek{grid-row:5;grid-column:c 1/span 12;max-width:none}
+  .cover .meta{grid-row:6;grid-column:c 1/span 12}
+  .cover .lines{grid-row:7;grid-column:c 1/span 12}
+  .cover .issue{flex-direction:column;gap:4px}
+  .toc ol{grid-template-columns:repeat(2,1fr)}
+  .toc a{grid-template-columns:52px 1fr;gap:8px;padding:12px 8px 12px 0}
+  .toc img{width:52px;height:52px}
+  .toc b{font-size:28px}
+  .toc small{letter-spacing:.08em;font-size:10px}
+  .toc li:nth-child(2){border-right:0}
+  .toc li:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .nav{display:none}
+  .fl,.fr{width:48%;margin-left:0;margin-right:0}
+  .fl{margin-right:10px}.fr{margin-left:10px}
+  .mosaic{grid-template-columns:repeat(4,1fr)}
+  .mosaic .legend{grid-column:span 2;grid-row:span 1;padding:8px;gap:2px;font-size:9px;line-height:12px;letter-spacing:0;white-space:nowrap;overflow:hidden}
+  .lineup{grid-template-columns:repeat(5,1fr);padding-inline:12px}
+  .meshes{grid-template-columns:repeat(2,1fr);gap:12px}
+  .sweep{grid-template-columns:repeat(2,1fr);gap:12px}
+  .prints{grid-template-columns:repeat(2,1fr);grid-template-areas:"c c" "o k" "m d";gap:12px}
+  .flow{grid-template-columns:1fr}
+  .flow > li::after{display:none}
+  .zig > li{grid-template-columns:1fr;row-gap:12px}
+  .zig h4,.zig p,.zig > li:nth-child(even) h4,.zig > li:nth-child(even) p{grid-column:1;grid-row:auto;text-align:left}
+  .night .n1,.night .n2,.night .n3,.night .n4{grid-column:content;grid-row:auto;margin-top:calc(var(--u)*4)}
+  .wallword{font-size:clamp(96px,30vw,160px)}
+  .btn{font-size:20px;padding:14px 20px;width:100%;justify-content:center}
+  .sig{font-size:48px}
+  .colophon dl{grid-template-columns:1fr;gap:2px}
+  .colophon dt{margin-top:12px}
+  figcaption{flex-wrap:wrap}
+  figcaption .r{margin-left:0;flex-basis:100%}
+  table{min-width:900px}
+  .n-xxl{font-size:clamp(120px,36vw,180px)}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#s1">Skip to the story</a>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="in">
+    <a class="brand" href="#top"><i aria-hidden="true"></i>Phosphor Bear</a>
+    <nav class="nav" aria-label="Stages">
+      <a href="#s1"><b>01</b>References</a>
+      <a href="#s2"><b>02</b>Mesh</a>
+      <a href="#s3"><b>03</b>Print</a>
+      <a href="#files"><b>04</b>Files</a>
+      <a href="#method">Method</a>
+      <a href="#night">The night</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ================= COVER ================= -->
+<section class="cover mag" aria-label="Cover">
+  <p class="issue mono"><span><b>Issue 01</b> · the making of a glowing bear</span><span>4 stages · 83 pictures · 6 print files</span></p>
+  <h1 class="l1 d9">Phosphor</h1>
+  <div class="bear"><img src="img/hero-c-cutout.png" width="1024" height="1024" alt="Candidate c: a matte clay grizzly rearing on its hind legs in three-quarter view, one paw raised, mouth open, lit green from inside" fetchpriority="high"></div>
+  <h1 class="l2 d9 lit">Bear</h1>
+  <p class="dek">A rearing grizzly: <strong>generated, reconstructed, repaired</strong> and printed hollow to glow from inside. A totem for Goldrush.</p>
+  <p class="meta mono"><span>160 mm tall</span><span>strontium-aluminate filament</span><span>lit by blacklight</span><span>12 September 2026</span></p>
+  <nav class="lines" aria-label="Cover lines">
+    <a href="#s1"><b>01</b>Twenty bears in six minutes<span>refs</span></a>
+    <a href="#wall"><b>02</b>What a missing cutout builds: a 160 × 47 mm wall<span>mesh</span></a>
+    <a href="#s3"><b>03</b>874 shells become one solid<span>print</span></a>
+    <a href="#night"><b>☾</b>The night the box nearly went down<span>diary</span></a>
+  </nav>
+</section>
+
+<nav class="toc" aria-label="Contents">
+  <div class="mag"><ol>
+    <li><a href="#s1"><img src="img/cut-k.png" width="900" height="900" loading="lazy" alt=""><span><b>01</b><small>Twenty references</small></span></a></li>
+    <li><a href="#s2"><img src="img/cut-d.png" width="900" height="900" loading="lazy" alt=""><span><b>02</b><small>Picture to solid</small></span></a></li>
+    <li><a href="#s3"><img src="img/cut-o.png" width="900" height="900" loading="lazy" alt=""><span><b>03</b><small>Watertight, printable</small></span></a></li>
+    <li><a href="#files"><img src="img/cut-m.png" width="900" height="900" loading="lazy" alt=""><span><b>04</b><small>Six files, one glow</small></span></a></li>
+  </ol></div>
+</nav>
+
+<!-- ================= 01 REFERENCES ================= -->
+<section id="s1" class="pad">
+  <div class="mag rv">
+    <p class="rail">Stage one · reference images · Z-Image Turbo · 896² · 8 steps</p>
+    <h2 class="a1 w7 r1 d9 h-xl">Twenty</h2>
+    <figure class="a8 w5 r12 z1"><div class="frame"><img src="img/ref-k.jpg" width="1024" height="1024" loading="lazy" alt="Candidate k: clay grizzly in three-quarter view, one paw raised high, the other sweeping forward, head turned"><span class="tag" aria-hidden="true">k</span></div></figure>
+    <h2 class="a1 w7 r2 d9 h-xl it" style="text-align:right;padding-right:.1em;color:var(--text2)">bears in</h2>
+    <h2 class="a1 w12 r3 d1 h-xl ghost" style="margin-top:.04em">six minutes</h2>
+  </div>
+
+  <div class="sp"></div>
+
+  <div class="mag rv">
+    <div class="a1 w8 prose clear">
+      <img class="fr" src="img/cut-q.png" width="900" height="900" loading="lazy" alt="Cutout of candidate q, a lean clay grizzly with elbows bent, paws up" style="shape-outside:url(img/cut-q.png)">
+      <p class="dc lede">Reconstruction models are ruthless about their input. Stage one decides everything downstream, so the first job was a bear that stands three-quarter to the camera: whole animal, flat grey ground, no shadows, matte clay, no fur to reconstruct.</p>
+      <p>Round one asked Qwen-Image 2512 for a “three-quarter front view” and got four bears staring dead ahead. The model centres and symmetrises unless the view is described <em>geometrically</em>, and early in the prompt. So the prompt became a matrix built in-graph from six clauses: subject, view, pose, mass, mouth, style. The view clause stopped naming an angle and started describing where the shoulders are.</p>
+      <p>Then the sweep moved from Qwen to Z-Image Turbo, twenty candidates in one graph, five per chunk, and the whole sheet was on the table in about six minutes.</p>
+    </div>
+    <div class="a10 w3" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;overflow:hidden">
+      <figure class="frame"><img src="img/round1-a.jpg" width="1024" height="1024" loading="lazy" alt="Round-one reference a: a clay grizzly rearing, facing the camera squarely" style="filter:grayscale(1) brightness(.6)"></figure>
+      <figure class="frame"><img src="img/round1-b.jpg" width="1024" height="1024" loading="lazy" alt="Round-one reference b: a clay grizzly rearing with thin outstretched arms, facing the camera" style="filter:grayscale(1) brightness(.6)"></figure>
+      <figure class="frame"><img src="img/round1-c.jpg" width="1024" height="1024" loading="lazy" alt="Round-one reference c: a clay grizzly rearing and roaring, facing the camera" style="filter:grayscale(1) brightness(.6)"></figure>
+      <figure class="frame"><img src="img/round1-d.jpg" width="1024" height="1024" loading="lazy" alt="Round-one reference d: a clay grizzly rearing with elbows bent, facing the camera" style="filter:grayscale(1) brightness(.6)"></figure>
+      <span class="stamp" aria-hidden="true">Frontal ×4</span>
+      <p class="mono" style="grid-column:1/-1;color:var(--muted)">Round 1 · Qwen · prompt said “three-quarter” · all four frontal</p>
+    </div>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="band mag" style="padding-block:calc(var(--u)*8)">
+    <p class="a1 w12 eyebrow">Say where the shoulders are</p>
+    <blockquote class="a1 w7 pull" style="margin:20px 0 0">“The bear's body is rotated about 45 degrees so its <span class="lit" style="font-style:normal">right side faces the camera</span>: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame.”<small>The view clause of candidate d · R34 bent heavy · first in every prompt</small></blockquote>
+    <figure class="a9 w4" style="margin-top:20px"><div class="frame"><img src="img/qwen-d.jpg" width="896" height="896" loading="lazy" alt="Round-two reference d from Qwen-Image: a clay grizzly rearing in a genuine three-quarter view, body rotated, near shoulder forward, elbows bent"></div><figcaption><b>d</b> Qwen, round 2 <span class="r">a genuine three-quarter</span></figcaption></figure>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <h3 class="a1 w12 d9 h-l" style="margin-bottom:-.28em;position:relative;z-index:2;mix-blend-mode:screen">The alphabet <span class="it" style="color:var(--text2)">of bears</span></h3>
+    <div class="full mosaic">
+      <figure class="tile big"><img src="img/ref-c.jpg" width="1024" height="1024" loading="lazy" alt="Candidate c, L34 bent heavy: clay grizzly, elbows bent, paws up in front of the chest, heavy build, mouth open; turned three-quarter as asked"><b>c</b><span>L34 bent heavy</span></figure>
+      <figure class="tile big"><img src="img/ref-d.jpg" width="1024" height="1024" loading="lazy" alt="Candidate d, R34 bent heavy: clay grizzly, elbows bent, paws up in front of the chest, heavy build, mouth open; turned three-quarter as asked"><b>d</b><span>R34 bent heavy</span></figure>
+      <figure class="tile edge"><img src="img/ref-h.jpg" width="1024" height="1024" loading="lazy" alt="Candidate h, R34 tall heavy: clay grizzly, rearing tall and narrow like a totem, heavy build, mouth open; borderline three-quarter"><b>h</b><span>R34 tall heavy</span><i class="stamp" aria-hidden="true">edge</i></figure>
+      <figure class="tile asked"><img src="img/ref-l.jpg" width="1024" height="1024" loading="lazy" alt="Candidate l, front bent heavy: clay grizzly, elbows bent, paws up in front of the chest, heavy build, mouth open; frontal, as asked"><b>l</b><span>front bent heavy</span><i class="stamp" aria-hidden="true">asked</i></figure>
+      <figure class="tile asked"><img src="img/ref-m.jpg" width="1024" height="1024" loading="lazy" alt="Candidate m, front tall heavy: clay grizzly, rearing tall and narrow like a totem, heavy build, mouth open; frontal, as asked"><b>m</b><span>front tall heavy</span><i class="stamp" aria-hidden="true">asked</i></figure>
+      <figure class="tile no"><img src="img/ref-t.jpg" width="1024" height="1024" loading="lazy" alt="Candidate t, L34hi reach heavy: clay grizzly, forelegs raised high and spread wide, heavy build, mouth open; asked to turn, came out frontal"><b>t</b><span>L34hi reach heavy</span><i class="stamp" aria-hidden="true">frontal</i></figure>
+      <figure class="tile big"><img src="img/ref-g.jpg" width="1024" height="1024" loading="lazy" alt="Candidate g, L34 tall heavy: clay grizzly, rearing tall and narrow like a totem, heavy build, mouth open; turned three-quarter as asked"><b>g</b><span>L34 tall heavy</span></figure>
+      <figure class="tile big"><img src="img/ref-i.jpg" width="1024" height="1024" loading="lazy" alt="Candidate i, L34hi tall closed: clay grizzly, rearing tall and narrow like a totem, heavy build, jaw closed; turned three-quarter as asked"><b>i</b><span>L34hi tall closed</span></figure>
+      <figure class="tile big"><img src="img/ref-j.jpg" width="1024" height="1024" loading="lazy" alt="Candidate j, L34 swipe heavy: clay grizzly, one paw raised high, the other sweeping forward, heavy build, mouth open; turned three-quarter as asked"><b>j</b><span>L34 swipe heavy</span></figure>
+      <figure class="tile big"><img src="img/ref-k.jpg" width="1024" height="1024" loading="lazy" alt="Candidate k, R34 swipe heavy: clay grizzly, one paw raised high, the other sweeping forward, heavy build, mouth open; turned three-quarter as asked"><b>k</b><span>R34 swipe heavy</span></figure>
+      <figure class="tile big"><img src="img/ref-o.jpg" width="1024" height="1024" loading="lazy" alt="Candidate o, Rprof bent closed: clay grizzly, elbows bent, paws up in front of the chest, heavy build, jaw closed; turned three-quarter as asked"><b>o</b><span>Rprof bent closed</span></figure>
+      <figure class="tile big"><img src="img/ref-q.jpg" width="1024" height="1024" loading="lazy" alt="Candidate q, R34 bent lean: clay grizzly, elbows bent, paws up in front of the chest, lean build, mouth open; turned three-quarter as asked"><b>q</b><span>R34 bent lean</span></figure>
+      <figure class="tile big"><img src="img/ref-r.jpg" width="1024" height="1024" loading="lazy" alt="Candidate r, L34 bent closed: clay grizzly, elbows bent, paws up in front of the chest, heavy build, jaw closed; turned three-quarter as asked"><b>r</b><span>L34 bent closed</span></figure>
+      <figure class="tile big"><img src="img/ref-s.jpg" width="1024" height="1024" loading="lazy" alt="Candidate s, R34 tall closed: clay grizzly, rearing tall and narrow like a totem, heavy build, jaw closed; turned three-quarter as asked"><b>s</b><span>R34 tall closed</span></figure>
+      <div class="legend"><span><b>large</b> turned as asked · 10</span><span><b>edge</b> borderline · 1</span><span><i>frontal</i> came out frontal · 7</span><span><b>asked</b> frontal on purpose · 2</span></div>
+      <figure class="tile no"><img src="img/ref-a.jpg" width="1024" height="1024" loading="lazy" alt="Candidate a, L34 reach heavy: clay grizzly, forelegs raised high and spread wide, heavy build, mouth open; asked to turn, came out frontal"><b>a</b><span>L34 reach heavy</span><i class="stamp" aria-hidden="true">frontal</i></figure>
+      <figure class="tile no"><img src="img/ref-b.jpg" width="1024" height="1024" loading="lazy" alt="Candidate b, R34 reach heavy: clay grizzly, forelegs raised high and spread wide, heavy build, mouth open; asked to turn, came out frontal"><b>b</b><span>R34 reach heavy</span><i class="stamp" aria-hidden="true">frontal</i></figure>
+      <figure class="tile no"><img src="img/ref-e.jpg" width="1024" height="1024" loading="lazy" alt="Candidate e, L34hi bent heavy: clay grizzly, elbows bent, paws up in front of the chest, heavy build, mouth open; asked to turn, came out frontal"><b>e</b><span>L34hi bent heavy</span><i class="stamp" aria-hidden="true">frontal</i></figure>
+      <figure class="tile no"><img src="img/ref-f.jpg" width="1024" height="1024" loading="lazy" alt="Candidate f, R34hi reach heavy: clay grizzly, forelegs raised high and spread wide, heavy build, mouth open; asked to turn, came out frontal"><b>f</b><span>R34hi reach heavy</span><i class="stamp" aria-hidden="true">frontal</i></figure>
+      <figure class="tile no"><img src="img/ref-n.jpg" width="1024" height="1024" loading="lazy" alt="Candidate n, Lprof reach heavy: clay grizzly, forelegs raised high and spread wide, heavy build, mouth open; asked to turn, came out frontal"><b>n</b><span>Lprof reach heavy</span><i class="stamp" aria-hidden="true">frontal</i></figure>
+      <figure class="tile no"><img src="img/ref-p.jpg" width="1024" height="1024" loading="lazy" alt="Candidate p, L34 reach lean: clay grizzly, forelegs raised high and spread wide, lean build, mouth open; asked to turn, came out frontal"><b>p</b><span>L34 reach lean</span><i class="stamp" aria-hidden="true">frontal</i></figure>
+    </div>
+  </div>
+
+  <div class="sp"></div>
+
+  <div class="mag rv">
+    <div class="a1 w12 stats">
+      <div class="hot"><b>20</b><span>candidates in one graph</span></div>
+      <div><b>~3.5<i> s</i></b><span>per image, Z-Image Turbo</span></div>
+      <div class="hot"><b>11<i> / 20</i></b><span>genuinely three-quarter</span></div>
+      <div><b>0</b><span>gate failures: whole bear, flat grey, matte</span></div>
+    </div>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <p class="a1 w5 pull">Every unintended frontal was a raised-arms pose. Symmetric arms pull the model into a symmetric camera.<small>The finding from the sheet</small></p>
+    <figure class="a7 w6 bleed-r plate"><div class="frame"><img src="img/round2z-sheet.jpg" width="1800" height="1718" loading="lazy" alt="Contact sheet of twenty clay grizzly candidates a to t, five per row, each labelled with id, view and pose tag, and seed"></div><figcaption><b>round 2z</b> the sheet as it came off the queue <span class="r">a–t · id · tag · seed</span></figcaption></figure>
+    <p class="a1 w5 small" style="margin-top:24px">Candidates a, b, e, f, n, p and t all asked for a turned body and all got a frontal one. All seven have both forelegs raised high and spread wide. The bent, tall and swipe poses turned exactly as asked. Rule for the next round: keep the pose asymmetric and the camera follows.</p>
+  </div>
+</section>
+
+<!-- ================= 02 MESH ================= -->
+<section id="s2" class="pad band">
+  <div class="mag rv">
+    <p class="rail">Stage two · image to 3D · rembg · Hunyuan3D 2.1</p>
+    <p class="a1 w6 r12 bignum ghost n-xxl z1" aria-hidden="true">66</p>
+    <h2 class="a6 w7 r1 d9 h-l z2" style="padding-top:.3em">From picture <span class="it" style="color:var(--text2)">to</span> solid</h2>
+    <div class="a4 w9 r2 prose z2 clear" style="margin-top:24px">
+      <img class="fl" src="img/cut-d.png" width="900" height="900" loading="lazy" alt="Cutout of candidate d, a heavy clay grizzly in three-quarter view with elbows bent" style="shape-outside:url(img/cut-d.png)">
+      <p class="lede"><strong>Sixty-six seconds</strong> from one cutout to a mesh: 271,556 triangles, not watertight, winding inconsistent. Repair is a real stage, not a checkbox. But the geometry it invents is right.</p>
+      <p>The fear going in was a flat back. A single front-facing photograph carries no information about the far side, and a reconstruction that fakes it badly gives you a bear-shaped relief. From a dead-on frontal reference, Hunyuan3D 2.1 invented a plausible bear behind the bear: shoulders, spine, rump. The raised forelegs read correctly from every side. Multi-view input was never needed for this pose.</p>
+    </div>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <p class="a1 w12 eyebrow" style="margin-bottom:12px">The twenty, cut out and lined up</p>
+  </div>
+  <div class="lineup rv">
+    <figure class="no"><img src="img/cut-a.png" width="900" height="900" loading="lazy" alt="Cutout of candidate a, forelegs raised high and spread wide, heavy build, mouth open"><b>a</b></figure>
+    <figure class="no"><img src="img/cut-b.png" width="900" height="900" loading="lazy" alt="Cutout of candidate b, forelegs raised high and spread wide, heavy build, mouth open"><b>b</b></figure>
+    <figure><img src="img/cut-c.png" width="900" height="900" loading="lazy" alt="Cutout of candidate c, elbows bent, paws up in front of the chest, heavy build, mouth open"><b>c</b></figure>
+    <figure><img src="img/cut-d.png" width="900" height="900" loading="lazy" alt="Cutout of candidate d, elbows bent, paws up in front of the chest, heavy build, mouth open"><b>d</b></figure>
+    <figure class="no"><img src="img/cut-e.png" width="900" height="900" loading="lazy" alt="Cutout of candidate e, elbows bent, paws up in front of the chest, heavy build, mouth open"><b>e</b></figure>
+    <figure class="no"><img src="img/cut-f.png" width="900" height="900" loading="lazy" alt="Cutout of candidate f, forelegs raised high and spread wide, heavy build, mouth open"><b>f</b></figure>
+    <figure><img src="img/cut-g.png" width="900" height="900" loading="lazy" alt="Cutout of candidate g, rearing tall and narrow like a totem, heavy build, mouth open"><b>g</b></figure>
+    <figure><img src="img/cut-h.png" width="900" height="900" loading="lazy" alt="Cutout of candidate h, rearing tall and narrow like a totem, heavy build, mouth open"><b>h</b></figure>
+    <figure><img src="img/cut-i.png" width="900" height="900" loading="lazy" alt="Cutout of candidate i, rearing tall and narrow like a totem, heavy build, jaw closed"><b>i</b></figure>
+    <figure><img src="img/cut-j.png" width="900" height="900" loading="lazy" alt="Cutout of candidate j, one paw raised high, the other sweeping forward, heavy build, mouth open"><b>j</b></figure>
+    <figure><img src="img/cut-k.png" width="900" height="900" loading="lazy" alt="Cutout of candidate k, one paw raised high, the other sweeping forward, heavy build, mouth open"><b>k</b></figure>
+    <figure class="no"><img src="img/cut-l.png" width="900" height="900" loading="lazy" alt="Cutout of candidate l, elbows bent, paws up in front of the chest, heavy build, mouth open"><b>l</b></figure>
+    <figure class="no"><img src="img/cut-m.png" width="900" height="900" loading="lazy" alt="Cutout of candidate m, rearing tall and narrow like a totem, heavy build, mouth open"><b>m</b></figure>
+    <figure class="no"><img src="img/cut-n.png" width="900" height="900" loading="lazy" alt="Cutout of candidate n, forelegs raised high and spread wide, heavy build, mouth open"><b>n</b></figure>
+    <figure><img src="img/cut-o.png" width="900" height="900" loading="lazy" alt="Cutout of candidate o, elbows bent, paws up in front of the chest, heavy build, jaw closed"><b>o</b></figure>
+    <figure class="no"><img src="img/cut-p.png" width="900" height="900" loading="lazy" alt="Cutout of candidate p, forelegs raised high and spread wide, lean build, mouth open"><b>p</b></figure>
+    <figure><img src="img/cut-q.png" width="900" height="900" loading="lazy" alt="Cutout of candidate q, elbows bent, paws up in front of the chest, lean build, mouth open"><b>q</b></figure>
+    <figure><img src="img/cut-r.png" width="900" height="900" loading="lazy" alt="Cutout of candidate r, elbows bent, paws up in front of the chest, heavy build, jaw closed"><b>r</b></figure>
+    <figure><img src="img/cut-s.png" width="900" height="900" loading="lazy" alt="Cutout of candidate s, rearing tall and narrow like a totem, heavy build, jaw closed"><b>s</b></figure>
+    <figure class="no"><img src="img/cut-t.png" width="900" height="900" loading="lazy" alt="Cutout of candidate t, forelegs raised high and spread wide, heavy build, mouth open"><b>t</b></figure>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <figure class="a1 w8 plate"><div class="frame"><img src="img/mesh-round1-d-views.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of the first mesh from reference d: front, left, back, right, top and three-quarter, with a plausible back and spine"></div><figcaption><b>first mesh</b> ref_d · octree 256 · 30 steps <span class="r">the back is a bear</span></figcaption></figure>
+    <div class="a9 w4">
+      <p class="d7 h-m">The flat-back fear, <span class="lit">disproven</span></p>
+      <p class="small" style="margin-top:16px">Six views of the very first mesh. The reference showed only the front. The back view shows shoulders, a spine and a rump that nobody drew.</p>
+    </div>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <!-- the wall -->
+  <div class="wall mag" id="wall" style="padding-block:calc(var(--u)*8)">
+    <p class="a1 w5 r1 eyebrow">Without background removal</p>
+    <div class="a1 w5 r2 prose" style="margin-top:20px">
+      <p class="d9 h-l">A 160 × 47 mm</p>
+      <p style="margin-top:20px">The control run skipped the cutout and fed the flat grey ground straight into the reconstruction. Hunyuan3D did exactly what it was asked: it rebuilt the backdrop as a <strong>solid slab</strong> and attached the bear to it as a relief. 879,874 triangles of wall.</p>
+      <p>Background removal is mandatory, not a nicety. Every one of the twenty goes through rembg first.</p>
+    </div>
+    <figure class="a6 w7 r13 bleed-r plate z1" style="align-self:center"><div class="frame"><img src="img/nobg-wall-views.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of the no-background control: the bear stands in relief on a flat slab, the back view is a blank wall, the top view shows a thin plate 160 by 47 millimetres"></div><figcaption><b>nobg</b> octree 384 · 30 steps · no cutout <span class="r">879,874 tris · footprint 160 × 47 mm</span></figcaption></figure>
+    <p class="a1 w9 r3 d9 ghost red wallword z2" aria-hidden="true">wall</p>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <h3 class="a1 w12 d9 h-l">The sweep <span class="it" style="color:var(--text2)">verdict</span></h3>
+    <p class="a1 w6 small" style="margin:16px 0 24px">Octree 256, 384 and 512. Thresholds 0.5, 0.6, 0.7. Two more seeds. Fifty steps instead of thirty. All on the same reference, all at 160 mm, all rendered six ways. Same silhouette, same back, footprint within 0.3 mm, and the same three places needing support: underarms, crotch, under the muzzle.</p>
+    <div class="a1 w12 sweep">
+      <figure class="plate"><div class="frame"><img src="img/sweep-o256.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of reference d at octree 256, 30 steps"></div><figcaption><b>o256</b> 30 steps <span class="r">276k tris · 8.6 %</span></figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/sweep-o384.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of reference d at octree 384, 30 steps"></div><figcaption><b>o384</b> 30 steps <span class="r">615k tris</span></figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/sweep-t05.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of reference d at octree 384 with iso threshold 0.5"></div><figcaption><b>t 0.5</b> threshold <span class="r">±1 % tris</span></figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/sweep-t07.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of reference d at octree 384 with iso threshold 0.7"></div><figcaption><b>t 0.7</b> threshold <span class="r">±1 % tris</span></figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/sweep-seed2.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of reference d at octree 384 with seed 2"></div><figcaption><b>seed 2</b> <span class="r">8.6 %</span></figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/sweep-seed3.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of reference d at octree 384 with seed 3"></div><figcaption><b>seed 3</b> <span class="r">9.3 %</span></figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/sweep-s50.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of reference d at octree 384, 50 steps"></div><figcaption><b>50 steps</b> <span class="r">618,812 tris · 8.96 %</span></figcaption></figure>
+      <div class="verdict"><b>It is all the same bear</b><p>At print scale the 0.6 mm voxel remesh discards everything above octree 256 anyway. Settings for the twenty: octree 256, 30 steps, threshold 0.6, any seed.</p></div>
+    </div>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <h3 class="a1 w12 d9 h-l">Twenty <span class="d1" style="color:var(--text2)">reconstructions</span> one queue</h3>
+    <p class="a1 w6 small" style="margin-top:16px">Every reference was reconstructed, not just the picks. A mesh is what you actually choose on; picking from the picture alone hides the failure modes. Red marks faces that would need support.</p>
+    <div class="a1 w12 meshes" style="margin-top:24px">
+      <figure class="plate"><div class="frame"><img src="img/mesh-a.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate a reconstructed: forelegs raised high and spread wide, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">a</span></div><figcaption><b>a</b> L34 reach heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-b.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate b reconstructed: forelegs raised high and spread wide, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">b</span></div><figcaption><b>b</b> R34 reach heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-c.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate c reconstructed: elbows bent, paws up in front of the chest, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">c</span></div><figcaption><b>c</b> L34 bent heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-d.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate d reconstructed: elbows bent, paws up in front of the chest, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">d</span></div><figcaption><b>d</b> R34 bent heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-e.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate e reconstructed: elbows bent, paws up in front of the chest, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">e</span></div><figcaption><b>e</b> L34hi bent heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-f.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate f reconstructed: forelegs raised high and spread wide, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">f</span></div><figcaption><b>f</b> R34hi reach heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-g.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate g reconstructed: rearing tall and narrow like a totem, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">g</span></div><figcaption><b>g</b> L34 tall heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-h.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate h reconstructed: rearing tall and narrow like a totem, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">h</span></div><figcaption><b>h</b> R34 tall heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-i.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate i reconstructed: rearing tall and narrow like a totem, heavy build, jaw closed; faces needing support in red"><span class="tag" aria-hidden="true">i</span></div><figcaption><b>i</b> L34hi tall closed</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-j.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate j reconstructed: one paw raised high, the other sweeping forward, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">j</span></div><figcaption><b>j</b> L34 swipe heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-k.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate k reconstructed: one paw raised high, the other sweeping forward, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">k</span></div><figcaption><b>k</b> R34 swipe heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-l.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate l reconstructed: elbows bent, paws up in front of the chest, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">l</span></div><figcaption><b>l</b> front bent heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-m.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate m reconstructed: rearing tall and narrow like a totem, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">m</span></div><figcaption><b>m</b> front tall heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-n.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate n reconstructed: forelegs raised high and spread wide, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">n</span></div><figcaption><b>n</b> Lprof reach heavy</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-o.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate o reconstructed: elbows bent, paws up in front of the chest, heavy build, jaw closed; faces needing support in red"><span class="tag" aria-hidden="true">o</span></div><figcaption><b>o</b> Rprof bent closed</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-p.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate p reconstructed: forelegs raised high and spread wide, lean build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">p</span></div><figcaption><b>p</b> L34 reach lean</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-q.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate q reconstructed: elbows bent, paws up in front of the chest, lean build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">q</span></div><figcaption><b>q</b> R34 bent lean</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-r.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate r reconstructed: elbows bent, paws up in front of the chest, heavy build, jaw closed; faces needing support in red"><span class="tag" aria-hidden="true">r</span></div><figcaption><b>r</b> L34 bent closed</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-s.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate s reconstructed: rearing tall and narrow like a totem, heavy build, jaw closed; faces needing support in red"><span class="tag" aria-hidden="true">s</span></div><figcaption><b>s</b> R34 tall closed</figcaption></figure>
+      <figure class="plate"><div class="frame"><img src="img/mesh-t.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of candidate t reconstructed: forelegs raised high and spread wide, heavy build, mouth open; faces needing support in red"><span class="tag" aria-hidden="true">t</span></div><figcaption><b>t</b> L34hi reach heavy</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 PRINT ================= -->
+<section id="s3" class="pad">
+  <div class="mag rv">
+    <p class="rail">Stage three · printable mesh · trimesh + manifold3d</p>
+    <p class="a1 w5 r1 bignum" style="font-size:clamp(96px,17vw,260px)">874<i>shells</i></p>
+    <p class="a6 w2 r1 it" style="font-size:clamp(40px,6vw,96px);color:var(--muted);align-self:center;text-align:center">to</p>
+    <p class="a8 w5 r1 bignum lit" style="font-size:clamp(96px,17vw,260px)">1<i style="color:var(--glow2)">solid</i></p>
+    <p class="a1 w12 r2 mono" style="color:var(--muted);margin-top:8px">Euler number 349 → 2 · watertight yes · winding consistent · manifold3d NoError · 5,876 faces at 0.6 mm pitch · about eight seconds</p>
+  </div>
+
+  <div class="sp"></div>
+
+  <div class="mag rv">
+    <div class="a1 w8 prose clear">
+      <img class="fr" src="img/cut-o.png" width="900" height="900" loading="lazy" alt="Cutout of candidate o, a clay grizzly near profile with paws tucked and jaw closed" style="shape-outside:url(img/cut-o.png)">
+      <p class="dc lede">Making it real. What comes out of the reconstruction is marching-cubes soup: one connected body, about 180 boundary loops, 873 shells of debris, non-manifold edges from self-intersections. Hole filling cannot fix it by construction.</p>
+      <p>The repair is volumetric. Voxelise the soup into a solid at a 0.6 mm pitch, re-extract the surface, and the result is watertight by definition. Then decimate, orient, scale to 160 mm, and cut 8 mm off the bottom so the base is open for the light and the pole. Support need fell from 8.7 % to 6.2 % on the first bear; what remains is the crotch, the underarms and under the muzzle, which is a pose question, not a repair one.</p>
+    </div>
+    <figure class="a9 w4 plate"><div class="frame"><img src="img/print-round1-d.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of the repaired round-one bear d as a validated print-ready solid, faces needing support marked red"></div><figcaption><b>round1_d</b> repaired <span class="r">6.2 %</span></figcaption></figure>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <h3 class="a1 w6 d9 h-l">How many faces does a <span class="lit">jaw</span> need?</h3>
+    <p class="a8 w5 small" style="align-self:end">Low-poly facets catch the ultraviolet nicely, so fewer faces is not only smaller. But 6,000 collapses the open mouth to a slit. 12,000 keeps it. That is the default.</p>
+    <figure class="full plate" style="margin-top:24px"><div class="frame" style="border-inline:0"><img src="img/faces-ladder.jpg" width="1760" height="770" loading="lazy" alt="Ladder of the bear's head at 6,000, 12,000, 20,000 and 40,000 faces and the dense mesh, front and three-quarter; the 6,000-face jaw is a slit, the 12,000-face jaw is open"></div><figcaption style="padding-inline:var(--gutter)"><b>faces ladder</b> 6k · 12k · 20k · 40k · dense 304,540 <span class="r">12k chosen</span></figcaption></figure>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <h3 class="a1 w12 d9 h-l">Ranked by <span class="it" style="color:var(--text2)">how much of it</span> needs support</h3>
+    <div class="a1 w12 prints" style="margin-top:24px">
+      <figure class="pc plate"><div class="frame"><img src="img/print-c.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of print-ready bear c: one paw raised, mouth open, small red support areas under the raised forearm, the jaw and the crotch"><span class="pct" aria-hidden="true">5.2<i>%</i></span></div><figcaption><b>c</b> one paw raised <span class="r">recommended</span></figcaption></figure>
+      <figure class="po plate"><div class="frame"><img src="img/print-o.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of print-ready bear o: paws tucked, jaw closed"><span class="pct" aria-hidden="true">6.3<i>%</i></span></div><figcaption><b>o</b> paws tucked, jaw closed</figcaption></figure>
+      <figure class="pk plate"><div class="frame"><img src="img/print-k.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of print-ready bear k: both paws forward, head turned, red support areas under the forearms"><span class="pct" aria-hidden="true">7.6<i>%</i></span></div><figcaption><b>k</b> swipe, head turned</figcaption></figure>
+      <figure class="pm plate"><div class="frame"><img src="img/print-m.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of print-ready bear m: tall totem pose with arms at the sides, very little red"><span class="pct" aria-hidden="true">low</span></div><figcaption><b>m</b> tall totem</figcaption></figure>
+      <figure class="pd plate"><div class="frame"><img src="img/print-d.jpg" width="1800" height="1272" loading="lazy" alt="Six-view render of print-ready bear d: spread arms, roaring, red under the arms and crotch"><span class="pct" aria-hidden="true">6.3<i>%</i></span></div><figcaption><b>d</b> spread arms, the widest</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 FILES ================= -->
+<section id="files" class="pad band">
+  <div class="mag rv">
+    <p class="rail">Stage four · print files · Centauri Carbon 2</p>
+    <h2 class="a1 w7 d9 h-xl">Six solids</h2>
+    <p class="a8 w5 it" style="font-size:clamp(28px,3.4vw,48px);line-height:1.05;color:var(--text2);align-self:end;padding-bottom:.15em">ready for the slicer</p>
+    <p class="a1 w6 lede" style="margin-top:32px">Every STL is a validated solid: watertight, consistent winding, Euler 2, manifold3d clean, about 12,000 faces, scaled so the print is the height in its name, base opened for the light.</p>
+    <div class="a8 w5" style="margin-top:32px;align-self:center">
+      <a class="btn" href="print/bear-c-one-paw-raised-160mm.stl" download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 19h16"/></svg>
+        <span>Download bear c <small>STL · 160 mm · 0.6 MB</small></span>
+      </a>
+    </div>
+    <div class="a1 w12 tbl" style="margin-top:48px">
+      <table>
+        <thead><tr><th>File</th><th>Pose</th><th class="n">Footprint</th><th class="n">Support</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr class="rec"><td><a href="print/bear-c-one-paw-raised-160mm.stl" download>bear-c-one-paw-raised-160mm.stl</a></td><td>one paw raised, other arm down, mouth open</td><td class="n">90 × 84 mm</td><td class="n hot">5.2 %</td><td>recommended: most sculptural, least support</td></tr>
+          <tr><td><a href="print/bear-o-paws-tucked-jaw-closed-160mm.stl" download>bear-o-paws-tucked-jaw-closed-160mm.stl</a></td><td>paws at chest, jaw closed</td><td class="n">82 × 94 mm</td><td class="n">6.3 %</td><td>calmest; no jaw overhang</td></tr>
+          <tr><td><a href="print/bear-o-paws-tucked-jaw-closed-100mm-QUICK-TEST.stl" download>bear-o-…-100mm-QUICK-TEST.stl</a></td><td>same, 100 mm</td><td class="n">53 × 60 mm</td><td class="n">6.2 %</td><td>about a one-hour print to test glow and wall thickness</td></tr>
+          <tr><td><a href="print/bear-m-tall-totem-arms-down-160mm.stl" download>bear-m-tall-totem-arms-down-160mm.stl</a></td><td>tall, arms at the sides, frontal</td><td class="n">see preview</td><td class="n">low</td><td>the totem-pole shape</td></tr>
+          <tr><td><a href="print/bear-k-swipe-head-turned-160mm.stl" download>bear-k-swipe-head-turned-160mm.stl</a></td><td>both paws forward, head turned</td><td class="n">86 × 96 mm</td><td class="n">7.6 %</td><td>forearm undersides need support</td></tr>
+          <tr><td><a href="print/bear-d-classic-spread-arm-roar-160mm.stl" download>bear-d-classic-spread-arm-roar-160mm.stl</a></td><td>spread arms, roaring (round-one reference)</td><td class="n">143 × 66 mm</td><td class="n">6.3 %</td><td>the widest; underarms and crotch</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="a1 w8 prose small" style="margin-top:32px">
+      <p><strong>Slicer settings</strong> for a Centauri Carbon 2 with a 0.6 mm hardened nozzle and strontium-aluminate filament: 2 walls (1.2 mm), 0 % infill, 0 bottom layers, normal top layers, 0.2 mm layers, tree supports only at a 45° threshold to match the red areas, brim on.</p>
+      <p>The letter in each filename is the stage-one candidate id. Full provenance in <a href="print/README.md">print/README.md</a>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= METHOD ================= -->
+<section id="method" class="pad">
+  <div class="mag rv">
+    <p class="rail">How it was built · fragments · blueprints · sweeps</p>
+    <h2 class="a1 w12 d9 h-xl">The pipeline <span class="d1 ghost">is a</span> program</h2>
+    <div class="a1 w8 prose clear" style="margin-top:32px">
+      <img class="fl" src="img/cut-m.png" width="900" height="900" loading="lazy" alt="Cutout of candidate m, a clay grizzly rearing tall and straight like a totem" style="shape-outside:url(img/cut-m.png)">
+      <p class="lede">Not a sequence of manual ComfyUI sessions. <strong>Fragments are functions</strong>, blueprints are programs, and every stage is a sweep of twenty that lands on a contact sheet. Nobody waits for a human. The GPU never idles: the next informative job is queued behind the current one, and picks happen with full information, by id, once it exists.</p>
+      <p>Everything ran locally on one card, with no partner nodes and no per-generation billing anywhere in the pipeline. Parallel agents owned disjoint files; one of them committed.</p>
+    </div>
+  </div>
+
+  <div class="sp"></div>
+
+  <div class="mag rv">
+    <ol class="a1 w12 flow" aria-label="Four stages and their tools">
+      <li><h4>Reference images</h4><p>Twenty prompts from one six-clause matrix, one graph, five per chunk.</p><ul><li>Z-Image Turbo, 8 steps</li><li>Qwen-Image 2512 for finalists</li><li>prompt_builder fragment</li><li>sheet.py contact sheet</li></ul></li>
+      <li><h4>Image to 3D</h4><p>Cut out, then reconstruct all twenty at the settings the sweep chose.</p><ul><li>rembg</li><li>Hunyuan3D 2.1, octree 256</li><li>mesh_views.py six views</li></ul></li>
+      <li><h4>Printable mesh</h4><p>Voxel remesh, validate, decimate, orient, scale, open the base.</p><ul><li>trimesh + manifold3d</li><li>mesh_repair.py, 0.6 mm pitch</li><li>support census at 45°</li></ul></li>
+      <li><h4>Glowing print</h4><p>Hollow, two walls, no floor, a blacklight inside, a pole below.</p><ul><li>Centauri Carbon 2</li><li>0.6 mm hardened nozzle</li><li>strontium-aluminate PLA</li></ul></li>
+    </ol>
+  </div>
+
+  <div class="sp-l"></div>
+
+  <div class="mag rv">
+    <ul class="a1 w12 zig">
+      <li><h4>Fragments <em>are</em> functions</h4><p>A few nodes with typed inputs, outputs and named params. t2i, rembg, hy3d_i2m, tap_image. Composed, never copy-pasted.</p></li>
+      <li><h4>Blueprints <em>are</em> programs</h4><p>A YAML file wires fragments; <code>foreach</code> runs the whole pipeline once per item inside one graph so ComfyUI parallelises the branches.</p></li>
+      <li><h4>Sweeps <em>of</em> twenty</h4><p>Every stage produces about twenty candidates and a contact sheet. Picks happen with full information, by id, not before it exists.</p></li>
+      <li><h4>Taps, <em>bypassed</em> by default</h4><p>Intermediate saves live in the graph and are stripped at build time. Un-bypass one in the browser and only it runs; everything upstream is a cache hit.</p></li>
+      <li><h4>Outputs <em>are a</em> library</h4><p>Every PNG and GLB carries the API prompt that made it. Drag a file onto the canvas and the exact graph comes back.</p></li>
+      <li><h4>One graph, <em>watched</em> live</h4><p>The compiled graph is laid out grouped and colour-coded on the browser canvas with live denoising previews, so the sweep is something you can watch.</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= THE NIGHT ================= -->
+<section id="night" class="pad band">
+  <div class="mag rv">
+    <p class="rail">Overnight, 9 to 10 September · war stories</p>
+    <h2 class="a1 w12 d9 h-xl">The night the box <span class="it" style="color:var(--text2)">nearly</span> went down</h2>
+    <div class="sp"></div>
+  </div>
+  <ol class="mag night rv">
+    <li class="n1"><b>1 <i>/ 45 min</i></b><h4>Weights streaming from RAM</h4><p>Two Ollama runners were squatting on 6.2 GB of the 4090. Qwen-Image 2512 needs about 20 GB, so it streamed weights from system memory: one image every forty-five minutes.</p></li>
+    <li class="n2"><b>161 <i>/ 163 GB</i></b><h4>The commit limit</h4><p>ComfyUI's Python reached 47 GB of commit beside a 62 GB WSL VM. The machine hit its limit and the Claude Code session died. Windows stayed up. Stage one moved to Z-Image Turbo.</p></li>
+    <li class="n3"><b>157.8 <i>GB</i></b><h4>The guard fires</h4><p>A memory guard written after the crash watched system commit during the reconstruction queue. It fired once, at 157.8 GB, and saved the box.</p></li>
+    <li class="n4"><b>7<i>+ min</i></b><h4>A decode that ignored interrupt</h4><p>With the unet and text encoder both resident, one branch's VAE decode sat at 100 % GPU with no progress. Interrupt never reaches a decode. Fix: text encoder on the CPU, 12.7 GB peak, 33 s per image.</p></li>
+  </ol>
+</section>
+
+</main>
+
+<!-- ================= COLOPHON ================= -->
+<footer class="colophon mag">
+  <div class="a1 w4 rv">
+    <p class="sig">Phosphor<br>Bear</p>
+    <p class="mono" style="margin-top:16px;color:var(--muted)">Built 10 September 2026<br>for Goldrush, 12 September 2026<br>83 pictures, all generated here</p>
+  </div>
+  <div class="a6 w7 rv">
+    <dl>
+      <dt>Generation</dt><dd>ComfyUI, local, on one RTX 4090. Qwen-Image 2512 and Z-Image Turbo for references; Hunyuan3D 2.1 for reconstruction; rembg for cutouts.</dd>
+      <dt>Mesh</dt><dd>trimesh and manifold3d: voxel remesh, validation, decimation, orientation, support census, six-view renders.</dd>
+      <dt>Orchestration</dt><dd>The comfy CLI with fragments, blueprints and compose. Driven by Claude Code with parallel agents owning disjoint files, one of them committing.</dd>
+      <dt>Repository</dt><dd><a href="https://github.com/redaphid/3d-bear">github.com/redaphid/3d-bear</a>, MIT. The reference sheets, items.json and the print-ready STLs are committed; everything else is regenerable from the blueprints.</dd>
+      <dt>Type</dt><dd>Big Shoulders Display, in five weights, and Newsreader.</dd>
+    </dl>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // ?still freezes the scroll settle, for screenshots and previews.
+  if(/still/.test(location.search))document.documentElement.classList.add('still');
+  // Progress line fallback for browsers without scroll-driven animations.
+  var bar=document.getElementById('progress');
+  if(!(window.CSS&&CSS.supports&&CSS.supports('animation-timeline: scroll()'))){
+    var tick=function(){var d=document.documentElement;var m=d.scrollHeight-d.clientHeight;bar.style.transform='scaleX('+(m>0?d.scrollTop/m:0)+')';};
+    addEventListener('scroll',tick,{passive:true});tick();
+  }
+  // Highlight the stage under the reader in the top nav.
+  var links=[].slice.call(document.querySelectorAll('.nav a'));
+  var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('is-active');});var a=map[e.target.id];if(a)a.classList.add('is-active');}});
+    },{rootMargin:'-40% 0px -55% 0px'});
+    Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)io.observe(el);});
+  }
+})();
+</script>
+</body>
+</html>
