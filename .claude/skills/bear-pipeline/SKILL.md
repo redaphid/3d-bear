@@ -37,6 +37,14 @@ the PNG/GLB metadata is the re-runnable workflow) or the per-file watcher patter
   underside), arms **overhead or one-up-one-down** (guard/clasp shade the belly), and
   use the **bronze prompt** (grizzly anatomy survives the remesh; fur texture does not
   cost anything; the clay prompt gives a plush toy). Z-Image ignores "legs together".
+- **Identity beats the number (round 4z, the chosen bear):** name the grizzly field marks in
+  every prompt — shoulder hump, dished face with a broad short muzzle, small round ears, long
+  straight claws, massive neck, furrowed brow, lips drawn back over the canines. "Bronze with a
+  heavy brow" was not enough; the field-mark prompt made all 20 read as grizzlies. A visible,
+  forward-facing roar costs ~1 point of support over the sky-roar and is worth it. The user chose
+  round-4 `b` (front, arms overhead, roar raised 30 deg, bronze) at 3.0 %.
+- **Leaky Hunyuan shell** (repair log: "closing radius 5 did not seal", footprint in metres):
+  re-run `mesh_repair.py` with `--pitch 0.6`.
 - **Score on the post-repair figure** (`mesh_repair.py --open-base` then `check_mesh.py`
   on the STL): the raw census counts the slab's underside (d: 16.5 % raw, 4.4 % repaired).
 - **Z-Image Turbo with `load_clip_device: cpu`** is the sweep generator on this box
