@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Stage 5 — keychain: scale a validated bear STL and fuse a hanging loop onto the top of its head.
+"""Stage 5 — keychain: scale a validated bear STL and give it something to hang from.
 
     python tools/keychain.py print-ready/bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl \
         --out print-ready/keychain-bear-r4b-32mm.stl --scale 0.2 [--hole 4.5] [--tube 2.2] [--plane front|side] [--views]
@@ -8,6 +8,11 @@
   keychain scale the piece prints solid, there is no pole or light.
 - The head top is found as the highest point of the mesh inside the central column (|x| < 18 % of
   the width around the bear's centre), which ignores raised paws.
+- --style hole (recommended for a thin stretch cord) bores a --hole mm tunnel straight through the
+  figure at --hole-z of its height. No added geometry, and the load is carried by the whole
+  section there (about 55 mm^2) instead of by a thin loop (14 mm^2 for a 3 mm ring).
+- --style bail makes a slab with a drilled hole; --style torus makes a ring. For a ring the
+  weak point is its own widest line, two bare tube circles, and sinking it deeper does NOT help.
 - The ring is a torus (hole diameter --hole, tube diameter --tube, in printed mm) whose plane is
   vertical: --plane front puts the hole facing the viewer (a pendant bail, chain runs front-to-back),
   --plane side puts the hole facing sideways (chain runs left-right). It sinks --sink mm into the
@@ -68,10 +73,11 @@ def main() -> int:
     ap.add_argument("--tube", type=float, default=2.2, help="tube (wire) diameter of the loop, mm printed")
     ap.add_argument("--sink", type=float, default=1.2, help="how far the loop sinks into the head, mm")
     ap.add_argument("--plane", choices=["front", "side"], default="front")
-    ap.add_argument("--style", choices=["torus", "bail"], default="torus",
-                    help="torus = a ring (min section is 2 tube circles); bail = a slab with a drilled hole (min section is 2 x thickness x web)")
+    ap.add_argument("--style", choices=["torus", "bail", "hole"], default="torus",
+                    help="torus = a ring; bail = a slab with a drilled hole; hole = bore straight through the head, no added geometry")
     ap.add_argument("--thickness", type=float, default=4.0, help="bail only: slab thickness along the hole axis, mm")
     ap.add_argument("--web", type=float, default=3.0, help="bail only: material either side of the hole, mm")
+    ap.add_argument("--hole-z", type=float, default=0.90, help="hole style only: height of the bore as a fraction of the model height")
     ap.add_argument("--column", type=float, default=0.18, help="half-width of the central column as a fraction of the model width")
     ap.add_argument("--views", action="store_true")
     a = ap.parse_args()
@@ -100,6 +106,29 @@ def main() -> int:
     # rotation that takes the canonical +z axis of a cylinder onto the hole axis
     to_axis = trimesh.transformations.rotation_matrix(np.pi / 2, [1, 0, 0]) if a.plane == "front" \
         else trimesh.transformations.rotation_matrix(np.pi / 2, [0, 1, 0])
+
+    if a.style == "hole":
+        # No added hardware: bore a cord hole straight through the head. Strongest option by far,
+        # because the load is carried by the whole skull section rather than by a thin added loop.
+        z_drill = m.bounds[0][2] + a.hole_z * ext[2]
+        span = float(np.abs(m.extents).max()) * 2
+        bore = trimesh.creation.cylinder(radius=a.hole / 2, height=span, sections=64)
+        bore.apply_transform(to_axis)
+        bore.apply_translation([cx, cy, z_drill])
+        out = difference(m, bore)
+        validate(out, "bored")
+        sec = out.section(plane_origin=[0, 0, z_drill], plane_normal=[0, 0, 1])
+        area = sum(abs(p.area) for p in sec.to_2D()[0].polygons_full) if sec is not None else float("nan")
+        log(f"cord hole  {a.hole:g} mm through the head at z {z_drill:.1f} mm ({a.hole_z:.0%} of height), axis {a.plane}; "
+            f"remaining section there {area:.1f} mm^2")
+        out.export(a.out)
+        e = out.extents
+        log(f"wrote {a.out}  {len(out.faces):,} faces  {e[0]:.1f} x {e[1]:.1f} x {e[2]:.1f} mm  ({time.time() - t0:.1f} s)")
+        if a.views:
+            import subprocess
+            png = a.out.rsplit(".", 1)[0] + "_views.png"
+            subprocess.run([sys.executable, "tools/mesh_views.py", a.out, "--out", png, "--height", f"{e[2]:.2f}"], check=False)
+        return 0
 
     if a.style == "torus":
         major = (a.hole + a.tube) / 2      # centre-line radius
