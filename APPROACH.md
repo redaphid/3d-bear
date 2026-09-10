@@ -51,6 +51,7 @@ candidates at once instead of one.
 
 **Stage 2**
 - `ref_d` → rembg → Hunyuan3D 2.1 (octree 256, 30 steps): **66 s**, 271,556 triangles, **not watertight**, winding not consistent. Repair is a real step, as HANDOFF predicted.
+- **The non-watertightness is real topology, not an export artifact.** One connected body with ~180 boundary loops and ~873 debris shells and a high Euler number — non-manifold edges from marching-cubes extraction with self-intersections. `fill_holes` cannot fix it by construction; the repair is a volumetric remesh (voxelize to a solid, re-extract), watertight by definition (`tools/mesh_repair.py`). Oriented and scaled to 160 mm the bear is **136 × 63 mm** with **8.6 %** of its surface needing support — well inside the Centauri. This is also the concrete evidence for HANDOFF's TRELLIS 2 pick: its DC remesh does this in-graph.
 - **GLB is Y-up.** `check_mesh.py` assumed Z-up and reported a 346 × 408 mm footprint at 160 mm tall — the bear was lying on its back in the checker. Its overhang census is meaningless until the mesh is oriented (`--up` flag being added).
 
 **Infrastructure**

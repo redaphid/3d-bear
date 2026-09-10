@@ -183,9 +183,23 @@ units. Budget real time here.
 1. **Convert and inspect.** `.glb` → `.stl`. `check_mesh.py` in this repo
    reports watertightness, winding, volume, footprint, height, and — the one
    that actually matters — an area-weighted census of every downward-facing
-   surface steeper than 45°.
-2. **Repair if not watertight.** Nothing downstream is trustworthy until it
-   is. Blender's 3D-Print Toolbox, or `trimesh` + `manifold3d`.
+   surface steeper than 45°. **GLB is Y-up**; `check_mesh.py --up auto`
+   rotates it (default for `.glb`). First bear at 160 mm: 136 × 63 mm
+   footprint, 8.6 % of surface needing support — well inside the Centauri.
+   `tools/mesh_views.py` renders six labelled views to one PNG for judging.
+2. **Repair if not watertight — by volumetric remesh, not hole-filling.**
+   Nothing downstream is trustworthy until it is. Measured on the first
+   Hunyuan3D 2.1 output (2026-09-10): one connected body, ~180 boundary
+   loops, ~873 tiny debris shells, high Euler number — non-manifold edges
+   shared by more than two faces, the signature of marching-cubes extraction
+   with self-intersections. Hole-filling cannot repair that by construction
+   (`trimesh.fill_holes` did nothing). The fix is to **voxelize to a solid and
+   re-extract the surface**, which is watertight by definition:
+   `tools/mesh_repair.py <in.glb> --out <out.stl> --height 160 --open-base`
+   (keeps the largest component, voxelizes at ~0.6 mm, re-extracts,
+   validates with `manifold3d`, decimates, scales, opens the base). This is
+   also the argument for TRELLIS 2 once ComfyUI is updated — its DC remesh
+   does exactly this inside the graph.
 3. **Decimate, deliberately.** Reconstruction output runs to hundreds of
    thousands of triangles. Decimating hard doesn't just slice faster — it
    *is* the low-poly aesthetic, and flat facets catch UV at different angles
