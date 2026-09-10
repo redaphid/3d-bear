@@ -48,8 +48,9 @@ INK = "#2b2b2b"
 PLATE = "#b9b6ad"
 DARK = np.array([0.12, 0.13, 0.17])    # shadow side of the mesh
 LIGHT = np.array([0.58, 0.60, 0.64])   # lit side; still darker than the ground
-BAD_DARK = np.array([0.55, 0.10, 0.08])   # shadow side of a face that needs support
-BAD_LIGHT = np.array([0.95, 0.40, 0.30])  # lit side of the same
+RED = (np.array([0.55, 0.10, 0.08]), np.array([0.95, 0.40, 0.30]))      # (shadow, lit)
+ORANGE = (np.array([0.60, 0.35, 0.05]), np.array([0.98, 0.72, 0.25]))
+PALETTE = {1: RED}   # face class -> colour ramp; class 0 is plain grey
 KEY_LIGHT = np.array([-0.35, 0.50, 0.79])  # camera space: upper left, over the shoulder
 KEY_LIGHT /= np.linalg.norm(KEY_LIGHT)
 
@@ -98,18 +99,21 @@ def nice_length(target):
     return float(min((1, 2, 5), key=lambda m: abs(m * mag - target)) * mag)
 
 
-def face_colors(normals, basis, bad):
-    """Lambert shading in camera space; red ramp for faces that need support."""
+def face_colors(normals, basis, classes, palette=PALETTE):
+    """Lambert shading in camera space; faces with a class > 0 take that class's ramp."""
     shade = np.abs((normals @ basis.T) @ KEY_LIGHT)[:, None]   # abs: don't punish bad winding
     colors = DARK + (LIGHT - DARK) * shade
-    colors[bad] = BAD_DARK + (BAD_LIGHT - BAD_DARK) * shade[bad]
+    for cls, (dark, light) in palette.items():
+        sel = classes == cls
+        colors[sel] = dark + (light - dark) * shade[sel]
     return colors
 
 
-def draw_panel(ax, tris, normals, bad, basis, center, radius, plate, title):
+def draw_panel(ax, tris, normals, classes, basis, center, radius, plate, title,
+               palette=PALETTE):
     P = np.einsum("ij,nkj->nki", basis, tris - center)      # camera-space triangles
     order = np.argsort(P[:, :, 2].mean(axis=1))              # far first
-    colors = face_colors(normals, basis, bad)
+    colors = face_colors(normals, basis, classes, palette)
 
     ax.set_facecolor(BACKGROUND)
     Q = (plate - center) @ basis.T
@@ -152,17 +156,19 @@ def guess_unit(path, height):
     return "units"
 
 
-def render(path, out=None, height=None, up="auto", render_faces=RENDER_FACES,
-           limit=cm.LIMIT_DEG, unit=None):
-    """Measure the full mesh, draw a decimated one. Returns (png path, measurements, up)."""
-    up = cm.guess_up(path, up)
-    mesh = cm.prepare(cm.load(path), up, height)
-    info = cm.measure(mesh, limit)
-    unit = unit or guess_unit(path, height)
+def render_mesh(mesh, out, title, footer, legend, classes=None, palette=PALETTE,
+                render_faces=RENDER_FACES, unit="mm", draw=None):
+    """
+    Six views of a prepared (Z-up, on the plate) mesh with per-face classes.
 
-    draw = for_drawing(mesh, render_faces)
+    `classes` is one int per face of the drawn mesh (0 plain, others via
+    `palette`). Pass `draw` if you already decimated a copy for drawing.
+    Returns the png path.
+    """
+    draw = draw if draw is not None else for_drawing(mesh, render_faces)
+    if classes is None or len(classes) != len(draw.faces):
+        classes = np.zeros(len(draw.faces), int)
     tris, normals = draw.triangles, draw.face_normals
-    bad = cm.overhang_census(draw, limit)["mask"]
     lo, hi = mesh.bounds
     center = (lo + hi) / 2
     plate = np.array([[lo[0], lo[1], lo[2]], [hi[0], lo[1], lo[2]],
@@ -172,22 +178,37 @@ def render(path, out=None, height=None, up="auto", render_faces=RENDER_FACES,
 
     fig, axes = plt.subplots(2, 3, figsize=(15, 10.6), dpi=DPI, facecolor=BACKGROUND)
     for ax, (name, toward) in zip(axes.flat, VIEWS):
-        draw_panel(ax, tris, normals, bad, camera(toward), center, radius, plate, name)
-    draw_scale_bar(axes[0, 0], nice_length(info["height"] / 4), unit, radius)
+        draw_panel(ax, tris, normals, classes, camera(toward), center, radius, plate, name,
+                   palette)
+    draw_scale_bar(axes[0, 0], nice_length(float(hi[2] - lo[2]) / 4), unit, radius)
 
-    fig.suptitle(Path(path).name, fontsize=15, color=INK, y=0.985)
-    fig.text(0.5, 0.032, footer_line(info), ha="center", fontsize=11, color=INK,
-             family="monospace")
-    fig.text(0.5, 0.010, f"red: faces that need support (downward, shallower than "
-                         f"{limit:g} deg, not on the plate)   dashed: build plate footprint",
-             ha="center", fontsize=8.5, color="#6b6b6b")
+    fig.suptitle(title, fontsize=15, color=INK, y=0.985)
+    fig.text(0.5, 0.032, footer, ha="center", fontsize=11, color=INK, family="monospace")
+    fig.text(0.5, 0.010, legend, ha="center", fontsize=8.5, color="#6b6b6b")
     fig.subplots_adjust(left=0.02, right=0.98, top=0.93, bottom=0.07,
                         wspace=0.06, hspace=0.14)
 
-    out = Path(out) if out else Path(path).with_name(Path(path).stem + "_views.png")
+    out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out, dpi=DPI, facecolor=BACKGROUND)
     plt.close(fig)
+    return out
+
+
+def render(path, out=None, height=None, up="auto", render_faces=RENDER_FACES,
+           limit=cm.LIMIT_DEG, unit=None):
+    """Measure the full mesh, draw a decimated one. Returns (png path, measurements, up)."""
+    up = cm.guess_up(path, up)
+    mesh = cm.prepare(cm.load(path), up, height)
+    info = cm.measure(mesh, limit)
+    unit = unit or guess_unit(path, height)
+    draw = for_drawing(mesh, render_faces)
+    classes = cm.overhang_census(draw, limit)["mask"].astype(int)
+    out = Path(out) if out else Path(path).with_name(Path(path).stem + "_views.png")
+    render_mesh(mesh, out, Path(path).name, footer_line(info),
+                f"red: faces that need support (downward, shallower than {limit:g} deg, "
+                f"not on the plate)   dashed: build plate footprint",
+                classes=classes, render_faces=render_faces, unit=unit, draw=draw)
     return out, info, up
 
 

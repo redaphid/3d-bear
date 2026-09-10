@@ -1,0 +1,70 @@
+{
+ "setting": "pitch 0.4, iso 0.5, 25000 faces, taubin x10",
+ "rows": [
+  {
+   "variant": "none",
+   "solid": true,
+   "tris": 23632,
+   "support_pct": 5.308338020513788,
+   "worst_band": [
+    0.0,
+    26.666666666666668,
+    859.290058076816,
+    1.364125812302261
+   ],
+   "volume_cm3": 415.05852603933363,
+   "legs": null,
+   "seconds": 10.994096755981445,
+   "stl": "outputs\\stage3_print\\quality\\c\\c_legs_none.stl",
+   "png": "outputs\\stage3_print\\quality\\c\\c_legs_none_views.png"
+  },
+  {
+   "variant": "hull",
+   "solid": true,
+   "tris": 24072,
+   "support_pct": 3.3237595424292303,
+   "worst_band": [
+    80.0,
+    106.66666666666667,
+    329.0122833599221,
+    28.957462959640708
+   ],
+   "volume_cm3": 435.42195052427223,
+   "legs": {
+    "variant": "hull",
+    "band_lo_mm": 0.0,
+    "crotch_mm": 24.5,
+    "top_mm": 28.5,
+    "sink_mm": 0.0,
+    "added_cm3": 29.67726463300985
+   },
+   "seconds": 27.540435314178467,
+   "stl": "outputs\\stage3_print\\quality\\c\\c_legs_hull.stl",
+   "png": "outputs\\stage3_print\\quality\\c\\c_legs_hull_views.png"
+  },
+  {
+   "variant": "between",
+   "solid": true,
+   "tris": 24752,
+   "support_pct": 3.93813779038876,
+   "worst_band": [
+    0.0,
+    26.666666666666668,
+    394.11177305824435,
+    24.49745845917367
+   ],
+   "volume_cm3": 429.53604727664595,
+   "legs": {
+    "variant": "between",
+    "band_lo_mm": 0.0,
+    "crotch_mm": 24.5,
+    "top_mm": 28.5,
+    "sink_mm": 0.0,
+    "added_cm3": 22.959406066680035
+   },
+   "seconds": 23.19675040245056,
+   "stl": "outputs\\stage3_print\\quality\\c\\c_legs_between.stl",
+   "png": "outputs\\stage3_print\\quality\\c\\c_legs_between_views.png"
+  }
+ ]
+}
