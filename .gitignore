@@ -159,10 +159,14 @@ third-party/
 
 # ComfyUI pipeline: generated outputs are regenerable and large. Keep only the
 # contact sheets and their item manifests so a reviewer can see what was picked.
+# outputs: commit everything small enough to be a sample for the write-up;
+# raw reconstructions (*.glb) stay out of git except hand-picked samples (git add -f).
 outputs/**
 !outputs/**/
-!outputs/**/sheet*.png
-!outputs/**/items.json
+!outputs/**/*.png
+!outputs/**/*.md
+!outputs/**/*.json
+!outputs/**/*.stl
 
 # comfy CLI machine-owned state (asset push lock, run journal) and build artifacts.
 # *.compiled.json is what `tools/build.py` emits from blueprints/*.yaml — rebuild, don't commit.
