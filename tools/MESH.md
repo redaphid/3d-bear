@@ -30,8 +30,12 @@ The fix is volumetric. Rasterise the shell into a voxel grid, close small
 gaps morphologically, flood-fill the interior to a solid, and pull a fresh
 surface out with marching cubes over the smoothed occupancy field. A
 marching-cubes isosurface of a padded scalar field is closed and manifold by
-construction. manifold3d then confirms it (`NoError`), which is also the bar
-for the base-opening boolean.
+construction, with one caveat the tool handles: where the surface passes
+exactly through a grid node, marching cubes emits coincident vertices that
+merge into zero-area faces, so those are dropped before validation.
+manifold3d then confirms the result (`NoError`), which is also the bar for
+the base-opening boolean. Verified watertight at 140, 150, 160, 170, 180 and
+200 mm.
 
 MeshFix (`--method meshfix`) also produced a valid solid on this mesh, in the
 same time, and keeps the original surface rather than a resampled one. It is
@@ -40,43 +44,43 @@ its guarantee does not depend on the input.
 
 ## Result on round1_d
 
-`python tools/mesh_repair.py outputs/scratch/mesh_round1_d.glb --out outputs/stage3_print/round1_d/round1_d_print.stl --height 160 --open-base`
+`python tools/mesh_repair.py outputs/scratch/mesh_round1_d.glb --out outputs/stage3_print/round1_d/round1_d_print.stl --height 160 --open-base --views`
 
-| | before | after (voxel, 0.6 mm, 6000 faces) |
+| | before | after (voxel 0.6 mm, 12,000 faces, base cut) |
 |---|---|---|
-| faces | 271,556 | 5,876 |
+| faces | 271,556 | 11,574 |
 | bodies | 1 (+873 debris) | 1 |
 | watertight / winding | no / no | yes / yes |
 | Euler | 349 | 2 |
 | manifold3d | NotManifold | NoError |
-| volume | n/a (open) | 404.6 cm³ |
-| height | 160.0 mm | 160.0 mm |
-| footprint | 135.9 × 62.7 mm | 143.0 × 66.4 mm (scaled 5% up before the 8 mm cut) |
-| needs support | 8.72 % | 6.16 %, worst band z 0–27 mm |
-| base openings | – | 2 (one per foot, ≈ 26 × 31 mm) |
+| volume | n/a (open) | 348.7 cm³ |
+| printed height | 160.0 mm | 152.0 mm (160 − 8 mm cut) |
+| footprint | 135.9 × 62.7 mm | 135.5 × 62.6 mm |
+| needs support | 8.72 % | 6.15 %, worst band z 0–25 mm |
+| base openings | – | 2 (one per foot, ≈ 25 × 30 mm) |
 
-Runs in about 8 s. The support that remains is the underarms, the crotch and
+Runs in about 8 s. The support that remains is the crotch, the underarms and
 the underside of the muzzle; the sheet tints those faces red. The 5 % gate is
 not met yet; that is a pose question, not a repair question.
 
 ## Defaults and what they cost
 
 - **Pitch 0.6 mm** at print scale (about one nozzle width; `--pitch`). Grid
-  is ~240 × 110 × 280 voxels at 160 mm; 0.4 mm is 3× slower and needs the
+  is ~230 × 105 × 270 voxels at 160 mm; 0.4 mm is 3× slower and needs the
   closing radius widened, which the tool does on its own when the flood fill
   leaks. Because a voxel the surface passes through counts as solid, the
-  remeshed skin grows by about half a pitch; the tool rescales to the target
-  height afterwards, so the residual is only that thin features are ~0.6 mm
-  fatter relative to the body.
-- **Decimation 6000 faces** (`--faces`). At 6000 the open jaw collapses to a
-  slit; 12,000 keeps it readable, 20,000 keeps the teeth. See
+  remeshed skin grows by about half a pitch; the tool rescales to `--height`
+  afterwards, so the residual is only that thin features are ~0.6 mm fatter
+  relative to the body.
+- **Decimation 12,000 faces** (`--faces`). At 6,000 the open jaw collapses to
+  a slit; 12,000 keeps it readable, 20,000 keeps the teeth. See
   `outputs/stage3_print/round1_d/round1_d_faces_ladder.png`. Decimation is
   validated; if it breaks the solid it retries gentler and finally keeps the
   dense mesh.
-- **Open base 8 mm** (`--open-base`, `--base`). The mesh is scaled to
-  `--height + --base` before the cut, so the printed part is `--height` tall
-  and 5 % larger than the raw at the same height. Change `work_height` in
-  `repair()` if the cut should come out of the 160 mm instead.
+- **Open base 8 mm** (`--open-base`, `--base`). The cut comes out of
+  `--height`: the model is scaled to 160 mm, the bottom 8 mm are removed, and
+  the print is 152 mm tall with the proportions of a 160 mm bear. The table's
+  `printed height` row is the height of the STL.
 
 ## The Y-up gotcha
 
@@ -95,18 +99,20 @@ python check_mesh.py <mesh> [--height 160] [--up auto|y|z] [--limit 45] [--expor
     exit 0 only if watertight and < 5 % needs support.
 
 python tools/mesh_repair.py <mesh> --out out.stl [--height 160] [--open-base] [--base 8]
-        [--method voxel|meshfix|fill|none] [--pitch 0.6] [--faces 6000] [--views sheet.png]
+        [--method voxel|meshfix|fill|none] [--pitch 0.6] [--faces 12000] [--views [sheet.png]]
     orient, scale, keep largest shell, remesh, validate (watertight / winding /
     Euler / manifold3d), decimate, fix winding, optional base cut, before/after
-    table, STL. Same exit code as check_mesh.
+    table, STL. A bare --views writes <out>_views.png beside the STL. Same exit
+    code as check_mesh.
 
 python tools/mesh_views.py <mesh> [--height 160] [--out sheet.png] [--limit 45] [--render-faces 60000]
     six orthographic views (front, left, back, right, top, three-quarter) on one
     sheet, red = needs support, footer with the check_mesh numbers.
 
 python tools/mesh_batch.py <dir> [--height 160] [--ext glb stl]
-    mesh_views for every mesh in a directory plus <dir>/mesh_report.md ranked
-    watertight-first, then least support.
+    mesh_views for every .glb and .stl in a directory plus <dir>/mesh_report.md
+    ranked watertight-first, then least support. Files that fail to load get a
+    "failed" row; a.glb and a.stl side by side get a_glb_views.png / a_stl_views.png.
 ```
 
 Views use Blender's naming: front looks at −Y, left from −X, right from +X,

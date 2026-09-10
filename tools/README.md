@@ -38,3 +38,11 @@ strip so a candidate can be picked by id. Also writes a half-size
 
 **`../check_mesh.py`** — Stage 3 printability report for a mesh (watertight,
 winding, volume, footprint, height, overhang census). Lives at the repo root.
+
+**`mesh_repair.py`, `mesh_views.py`, `mesh_batch.py`** — the rest of Stage 3.
+`mesh_repair.py` turns a Hunyuan3D GLB into a validated, decimated, scaled
+STL with an optional open base (volumetric remesh by default; hole filling
+cannot fix this class of mesh). `mesh_views.py` renders a six-view sheet with
+the faces that need support tinted red. `mesh_batch.py` runs the sheet over a
+directory and ranks the candidates. Diagnosis, rationale, defaults, CLI and
+the Y-up gotcha are in [`MESH.md`](MESH.md).

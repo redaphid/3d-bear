@@ -34,10 +34,11 @@ Steps, in order, each one reported as it runs:
 Then a before/after table and an STL. Exit code is check_mesh's: 0 if the
 result is watertight with under 5% of its surface needing support.
 
-With --open-base the mesh is scaled to --height plus --base before the cut,
-so the printed part is --height tall. Without --height, --pitch is in the
-file's own units and defaults to the same fraction of the model as 0.6 mm
-is of a 160 mm print.
+With --open-base the bottom --base mm come out of --height: the print is
+--height minus --base tall, with the proportions of a --height bear. Without
+--height, --pitch is in the file's own units and defaults to the same
+fraction of the model as 0.6 mm is of a 160 mm print. A bare --views writes
+the sheet beside the STL.
 
     pip install trimesh manifold3d numpy scipy scikit-image fast_simplification pymeshfix
 """
@@ -53,7 +54,7 @@ import trimesh
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import check_mesh as cm  # noqa: E402
 
-DEFAULT_FACES = 6000
+DEFAULT_FACES = 12000      # 6000 flattens the open jaw; 12000 keeps it readable
 DEFAULT_BASE = 8.0
 DEFAULT_PITCH = 0.6        # mm at print scale: about one nozzle width
 REFERENCE_HEIGHT = 160.0   # the height DEFAULT_PITCH is quoted at
@@ -165,6 +166,15 @@ def voxel_remesh(mesh, pitch, close=CLOSE_VOXELS):
     del field
     verts = trimesh.transform_points(verts - pad, grid.transform)
     out = trimesh.Trimesh(verts, faces[:, ::-1], process=True)
+    # where the isosurface passes exactly through a grid node, marching cubes
+    # emits coincident vertices; merged, they leave zero-area faces whose
+    # edges are shared 4 or 6 ways and the mesh is no longer watertight
+    n = len(out.faces)
+    out.update_faces(out.nondegenerate_faces())
+    out.update_faces(out.unique_faces())
+    out.remove_unreferenced_vertices()
+    if len(out.faces) != n:
+        log("remesh", f"dropped {n - len(out.faces)} zero-area/duplicate faces from marching cubes")
     if out.body_count > 1:
         parts = sorted(out.split(only_watertight=False), key=lambda p: len(p.faces), reverse=True)
         log("remesh", f"marching cubes produced {len(parts)} shells; kept the largest")
@@ -307,7 +317,7 @@ def table(before, after, openings):
     row("euler", f"{before['euler']}", f"{after['euler']}")
     row("manifold3d", before["manifold"], after["manifold"])
     row("volume", vol(before), vol(after))
-    row("height", f"{before['height']:.1f} mm", f"{after['height']:.1f} mm")
+    row("printed height", f"{before['height']:.1f} mm", f"{after['height']:.1f} mm")
     row("footprint", fp(before), fp(after))
     row("needs support", f"{before['unsupported_pct']:.2f}%", f"{after['unsupported_pct']:.2f}%")
     row("base openings", "-", str(openings) if openings is not None else "-")
@@ -346,12 +356,13 @@ def repair(path, out, faces=DEFAULT_FACES, height=None, base=None, up="auto",
     before = measure_all(mesh, limit)
     log("before", validation_line(validate(mesh)))
 
-    # cut first, then the target height is the height you get
-    work_height = (height + base) if (height and base) else height
+    # the base cut comes out of --height: the print is height - base tall
+    work_height = height
     if height:
         scale_and_place(mesh, work_height)
-        log("scale", f"to {work_height:g} mm"
-                     + (f" ({height:g} + {base:g} mm to be cut off)" if base else ""))
+        log("scale", f"to {height:g} mm"
+                     + (f" (bottom {base:g} mm to be cut off; printed height "
+                        f"{height - base:g} mm)" if base else ""))
     pitch = pitch if pitch is not None else default_pitch(mesh, height)
 
     mesh = largest_component(mesh)
@@ -380,8 +391,8 @@ def repair(path, out, faces=DEFAULT_FACES, height=None, base=None, up="auto",
     after = measure_all(mesh, limit)
     table(before, after, openings)
     if height and base:
-        print(f"\n  note: 'after' was scaled to {work_height:g} mm before the {base:g} mm cut, "
-              f"so it is {100 * base / height:.0f}% larger than 'before' at the same height")
+        print(f"\n  note: printed height is {height:g} - {base:g} = {height - base:g} mm; "
+              f"the base cut comes out of --height, not on top of it")
 
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -412,15 +423,19 @@ def main():
                     help="up axis in the file (auto: y for .glb/.gltf, else z)")
     ap.add_argument("--limit", type=float, default=cm.LIMIT_DEG,
                     help="overhang threshold in degrees")
-    ap.add_argument("--views", help="also render a six-view sheet of the result to this png")
+    ap.add_argument("--views", nargs="?", const="", metavar="PNG",
+                    help="also render a six-view sheet of the result (default: "
+                         "<out>_views.png beside the STL)")
     args = ap.parse_args()
 
     mesh, after, method = repair(args.path, args.out, args.faces, args.height,
                                  args.base if args.open_base else None, args.up,
                                  args.method, args.pitch, args.limit)
-    if args.views:
+    if args.views is not None:
         import mesh_views
-        png, _, _ = mesh_views.render(args.out, args.views, up="z", limit=args.limit)
+        out = Path(args.out)
+        views = args.views or out.with_name(out.stem + "_views.png")
+        png, _, _ = mesh_views.render(str(out), views, up="z", limit=args.limit)
         print(f"wrote {png}\n")
     return 0 if (after["watertight"] and after["unsupported_pct"] < 5.0) else 1
 

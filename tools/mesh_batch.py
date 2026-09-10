@@ -3,13 +3,17 @@
 mesh_batch.py — check and render every mesh in a directory, then rank them.
 
     python tools/mesh_batch.py outputs/round2
-    python tools/mesh_batch.py outputs/round2 --height 160 --ext glb stl
+    python tools/mesh_batch.py outputs/round2 --height 160 --ext glb
 
 Writes <name>_views.png beside each mesh and <dir>/mesh_report.md with one
 row per mesh — triangles, watertight, height, % needing support, the band
 where the support is — sorted so the most printable candidate is on top.
 Stage 2 produces a pile of these; this is how you pick one without opening
 each in a viewer.
+
+Takes .glb and .stl side by side by default (Y-up and Z-up respectively, via
+check_mesh's auto-detection). A file that fails to load — half-written,
+empty, not a mesh — gets a "failed" row and the batch carries on.
 """
 
 import argparse
@@ -48,8 +52,8 @@ def main():
     ap.add_argument("dir")
     ap.add_argument("--height", type=float, default=160.0,
                     help="scale every mesh to this height in mm before measuring (default 160)")
-    ap.add_argument("--ext", nargs="+", default=["glb"],
-                    help="extensions to include (default: glb)")
+    ap.add_argument("--ext", nargs="+", default=["glb", "stl"],
+                    help="extensions to include (default: glb stl)")
     ap.add_argument("--up", choices=cm.UP_CHOICES, default="auto")
     ap.add_argument("--limit", type=float, default=cm.LIMIT_DEG)
     args = ap.parse_args()
@@ -60,17 +64,21 @@ def main():
     if not files:
         raise SystemExit(f"no {'/'.join(args.ext)} files in {root}")
 
+    # a.glb and a.stl side by side must not overwrite each other's sheet
+    stems = [p.stem for p in files]
     results = []
     for path in files:
         t0 = time.time()
+        tag = f"{path.stem}_{path.suffix.lstrip('.')}" if stems.count(path.stem) > 1 else path.stem
         try:
-            png, info, up = mesh_views.render(path, height=args.height, up=args.up,
-                                              limit=args.limit)
+            png, info, up = mesh_views.render(path, out=path.with_name(tag + "_views.png"),
+                                              height=args.height, up=args.up, limit=args.limit)
             results.append((path.name, info, png, None))
             print(f"{path.name:<40} {info['faces']:>9,} tris  watertight "
                   f"{'yes' if info['watertight'] else 'no ':<3}  support "
                   f"{info['unsupported_pct']:5.1f}%   ({time.time() - t0:.1f} s)")
-        except Exception as e:  # one bad file shouldn't sink the batch
+        except (Exception, SystemExit) as e:  # one bad file shouldn't sink the batch
+            # SystemExit: check_mesh.load raises it for "nothing mesh-shaped"
             results.append((path.name, None, None, f"{type(e).__name__}: {e}"))
             print(f"{path.name:<40} FAILED {type(e).__name__}: {e}")
 
