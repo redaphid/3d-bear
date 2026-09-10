@@ -85,7 +85,7 @@ candidates at once instead of one.
 | `tooling` | `tap_*`, `tools/build.py`, `tools/ui/`, `PIPELINE.md`, `.gitignore`, **git** | compiler pass, grouped/coloured browser view, docs, commits |
 | main session | the browser, the queue, this file | shows results in chat as they land, steers, keeps the GPU fed |
 
-Only `tooling` commits routinely; the main session commits its own docs.
+Only `tooling` commits routinely; the main session commits its own docs. Later agents: `sweep2` (Z-Image round), `stage2b` (reconstructions + 384 pass), `meshtools2` (voxel remesh), `site` (docs/index.html). All finished or finishing by 01:00.
 
 ## 5. Output tree
 
@@ -110,3 +110,26 @@ outputs/
 - Does leaving the grey background in hurt reconstruction? (no-rembg control pending)
 - Is `fill_holes` enough to make 2.1 output watertight, or is a manifold rebuild needed? (`mesh_repair.py` pending)
 - Multi-view Hunyuan3D (`hunyuan3d-dit-v2-mv`) is not on disk; only fetch it if the backs are bad.
+
+## 7. State at handoff (2026-09-10, ~01:00)
+
+**Done.** 20 references (round 2z), all 20 reconstructed, parameter sweep and no-cutout control measured,
+repair chain validated, six print-ready STLs in `print-ready/` (recommended: `c`, 5.2 % support). Outputs
+committed as samples. Skills: `.claude/skills/bear-pipeline` (project), `comfy-local-ops` and
+`mesh-print-prep` (user-level). Showcase at `docs/index.html`.
+
+**Running / queued at handoff.** Octree-384 pass on the eight three-quarter candidates (`c d g i k o q s`),
+then `o512` — knowledge only; nothing waits on them. Results land under `outputs/stage2_mesh/round2z_o384/`
+and `outputs/stage2_params/d/`.
+
+**Next steps, in order.**
+1. **Print `bear-c-one-paw-raised-160mm.stl`** (or the 100 mm `o` first to settle wall thickness / glow —
+   `ladder.stl` is the coupon). Settings in `print-ready/README.md`. Diagnose before reprinting if the
+   Centauri faults again.
+2. If the pose needs changing after seeing it in the dark: re-render the chosen pose on **Qwen-Image 2512**
+   with the geometric view clause and an asymmetric pose (raised arms snap to frontal), Ollama down,
+   then reconstruct (256/30) and repair. One candidate is about 4 min end-to-end.
+3. Stage 4 is unchanged from HANDOFF: 2 walls, 0 % infill, 0 bottom layers, tree supports only under the
+   red areas, brim.
+4. Optional knowledge: TRELLIS 2 once ComfyUI is updated (its DC remesh replaces `mesh_repair.py`'s job
+   in-graph); multi-view Hunyuan is NOT needed — backs reconstruct fine from a single view.

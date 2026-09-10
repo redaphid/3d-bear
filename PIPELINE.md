@@ -165,3 +165,26 @@ item to `blueprints/stage2_mesh.yaml`, build, run. Vary `octree` (256 → 384 �
    anything you will want to inspect.
 4. `python tools/build.py blueprints/stage<N>_<x>.yaml`, publish it to the
    browser view, run it.
+
+## Stage 3 and shipping (added after the first night)
+
+- `tools/collect.py <server_subdir> <project_dir>` mirrors server outputs byte-for-byte and writes an `index.md`
+  (seed/steps/octree read from each file's own branch of the embedded prompt).
+- `tools/push_assets.py` wraps `comfy assets push` (which crashes on Windows after uploading) and merges the
+  leftover `.comfy/assets.lock.<pid>.tmp` into the lock.
+- `python tools/mesh_repair.py <glb> --out <stl> --height 160 --open-base --views` — largest shell → voxel remesh
+  → manifold validation → 12k faces → base cut. Hole-filling cannot repair Hunyuan output (non-manifold
+  marching-cubes edges); the voxel remesh is watertight by construction. `--height` is the printed height.
+- `tools/mesh_views.py` (six views, red = needs support), `tools/mesh_batch.py` / `mesh_index.py` (per-directory
+  reports). Rationale and defaults: `tools/MESH.md`.
+- Ship to `print-ready/bear-<id>-<pose>-160mm.stl` with `preview-bear-<id>.png` and a row in `print-ready/README.md`.
+
+## Operating notes (this box)
+
+- Z-Image sweeps: `load_clip_device: cpu` (default in `stage1_refs_z.yaml`) — with the encoder on the GPU a
+  branch can hang in VAE decode. Qwen-Image 2512 only with Ollama shut down.
+- Model families never share the card: finish Z-Image chunks, `POST /free {"unload_models":true}`, then Hunyuan.
+- Hunyuan3D settings are settled at octree 256 / 30 steps / threshold 0.6 (the sweep showed no difference at print
+  scale). rembg is mandatory (the control reconstructed the backdrop as a wall).
+- The full machine runbook (launch line with `--preview-method auto`, safe kill, memory guard, Ollama) is the
+  user-level Claude skill `comfy-local-ops`; the project runbook is `.claude/skills/bear-pipeline`.
