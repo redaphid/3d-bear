@@ -7,6 +7,8 @@ away so the base is open for the light and the pole.
 
 | file | pose | footprint | needs support | notes |
 |---|---|---|---|---|
+| `bear-r3b-sky-roar-on-rock-160mm.stl` | **round 3**: both arms up, head thrown back roaring at the sky, standing on a rock plinth | 86 x 71 mm | **2.5 %** | **new recommended** — the plinth is the plate contact and the one base opening; red is only the crotch and fingertips |
+| `bear-r3d-boxer-guard-on-rock-160mm.stl` | round 3: elbows tucked, forearms vertical, jaw closed, on a rock plinth | 96 x 85 mm | 4.4 % | calmest of the under-gate bears |
 | `bear-c-one-paw-raised-160mm.stl` | one paw raised, other arm down, mouth open | 90 x 84 mm | **5.2 %** | **recommended** — most sculptural and least support |
 | `bear-o-paws-tucked-jaw-closed-160mm.stl` | paws at chest, jaw closed | 82 x 94 mm | 6.3 % | calmest; no jaw overhang |
 | `bear-o-…-100mm-QUICK-TEST.stl` | same, 100 mm | 53 x 60 mm | 6.2 % | ~1 h print to test glow / wall thickness |
