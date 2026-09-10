@@ -1,0 +1,234 @@
+{
+  "_fragment": {
+    "name": "t2i_zimage",
+    "description": "Decomposed from templates/ref_zimage.json (gallery template image_z_image_turbo: z_image_turbo_bf16 + qwen_3_4b text encoder + ae VAE, 8 steps, cfg 1, res_multistep/simple). Positive prompt is the STRING input `prompt` (wire $alias.prompt from prompt_builder, or a literal). The template's ConditioningZeroOut negative was replaced by a real CLIPTextEncode exposed as param `negative` so a blueprint can wire $var.negative; NOTE at cfg=1 (Turbo's design point) KSampler skips the negative entirely, it only takes effect if ksampler_cfg is raised. Edit values as named params in a blueprint and rebuild with `comfy workflow compose` / tools/build.py - do not hand-edit the compiled workflow.",
+    "terminal": false,
+    "source": "templates/ref_zimage.json",
+    "inputs": {
+      "prompt": {
+        "type": "STRING",
+        "binds": "7.text"
+      }
+    },
+    "outputs": {
+      "image": {
+        "type": "IMAGE",
+        "from": "5",
+        "port": 0
+      }
+    },
+    "params": {
+      "load_clip_clip_name": {
+        "type": "STRING",
+        "binds": "2.clip_name",
+        "default": "qwen_3_4b.safetensors"
+      },
+      "load_clip_type": {
+        "type": "STRING",
+        "binds": "2.type",
+        "default": "lumina2"
+      },
+      "load_clip_device": {
+        "type": "STRING",
+        "binds": "2.device",
+        "default": "default"
+      },
+      "load_vae_vae_name": {
+        "type": "STRING",
+        "binds": "3.vae_name",
+        "default": "ae.safetensors"
+      },
+      "load_diffusion_model_unet_name": {
+        "type": "STRING",
+        "binds": "6.unet_name",
+        "default": "z_image_turbo_bf16.safetensors"
+      },
+      "load_diffusion_model_weight_dtype": {
+        "type": "STRING",
+        "binds": "6.weight_dtype",
+        "default": "default"
+      },
+      "emptysd3latentimage_width": {
+        "type": "INT",
+        "binds": "8.width",
+        "default": 1024
+      },
+      "emptysd3latentimage_height": {
+        "type": "INT",
+        "binds": "8.height",
+        "default": 1024
+      },
+      "emptysd3latentimage_batch_size": {
+        "type": "INT",
+        "binds": "8.batch_size",
+        "default": 1
+      },
+      "modelsamplingauraflow_shift": {
+        "type": "FLOAT",
+        "binds": "9.shift",
+        "default": 3.0
+      },
+      "ksampler_seed": {
+        "type": "INT",
+        "binds": "10.seed",
+        "default": 0
+      },
+      "ksampler_steps": {
+        "type": "INT",
+        "binds": "10.steps",
+        "default": 8
+      },
+      "ksampler_cfg": {
+        "type": "FLOAT",
+        "binds": "10.cfg",
+        "default": 1.0
+      },
+      "ksampler_sampler_name": {
+        "type": "STRING",
+        "binds": "10.sampler_name",
+        "default": "res_multistep"
+      },
+      "ksampler_scheduler": {
+        "type": "STRING",
+        "binds": "10.scheduler",
+        "default": "simple"
+      },
+      "ksampler_denoise": {
+        "type": "FLOAT",
+        "binds": "10.denoise",
+        "default": 1.0
+      },
+      "negative": {
+        "type": "STRING",
+        "binds": "11.text",
+        "default": ""
+      }
+    }
+  },
+  "2": {
+    "inputs": {
+      "clip_name": "qwen_3_4b.safetensors",
+      "type": "lumina2",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "3": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "5": {
+    "inputs": {
+      "samples": [
+        "10",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "6": {
+    "inputs": {
+      "unet_name": "z_image_turbo_bf16.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "7": {
+    "inputs": {
+      "text": "PLACEHOLDER",
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Positive Prompt)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "EmptySD3LatentImage"
+    }
+  },
+  "9": {
+    "inputs": {
+      "shift": 3.0,
+      "model": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingAuraFlow",
+    "_meta": {
+      "title": "ModelSamplingAuraFlow"
+    }
+  },
+  "10": {
+    "inputs": {
+      "seed": 0,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "res_multistep",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": [
+        "9",
+        0
+      ],
+      "positive": [
+        "7",
+        0
+      ],
+      "negative": [
+        "11",
+        0
+      ],
+      "latent_image": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "11": {
+    "inputs": {
+      "text": "",
+      "clip": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Negative Prompt)"
+    }
+  }
+}

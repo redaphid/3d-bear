@@ -1,0 +1,112 @@
+# Single-item blueprint for r (its branch hung in VAE decode inside the p-t chunk
+# when unet + text encoder were both GPU-resident). Same matrix entry, same prefix
+# as stage1_refs_z.yaml, load_clip_device: cpu (the safe config on this box).
+# Built + validated for team-lead to queue after Stage 2; already ran once as
+# b4661254 on 2026-09-10 00:27 and produced r_00001_.png in 29 s.
+output_prefix: 3d-bear/stage1_refs/round2z/ref
+
+# ---- clause library (YAML anchors; every item gets the full clause) ----------
+_clauses:
+  views:
+    L34: &L34 >-
+      The bear's body is rotated about 45 degrees so its left side faces the
+      camera: its left shoulder, left ear and left flank are nearest to us
+      while its right side recedes away from us; its head points the same way
+      as its body, snout angled toward the left edge of the frame. The camera
+      is at the bear's chest height, level with the bear.
+    R34: &R34 >-
+      The bear's body is rotated about 45 degrees so its right side faces the
+      camera: its right shoulder, right ear and right flank are nearest to us
+      while its left side recedes away from us; its head points the same way
+      as its body, snout angled toward the right edge of the frame. The camera
+      is at the bear's chest height, level with the bear.
+    L34hi: &L34hi >-
+      The bear's body is rotated about 45 degrees so its left side faces the
+      camera: its left shoulder, left ear and left flank are nearest to us
+      while its right side recedes away from us; its head points the same way
+      as its body, snout angled toward the left edge of the frame. The camera
+      is slightly above the bear's eye level looking gently downward, so the
+      top of the head and both shoulders are clearly visible.
+    R34hi: &R34hi >-
+      The bear's body is rotated about 45 degrees so its right side faces the
+      camera: its right shoulder, right ear and right flank are nearest to us
+      while its left side recedes away from us; its head points the same way
+      as its body, snout angled toward the right edge of the frame. The camera
+      is slightly above the bear's eye level looking gently downward, so the
+      top of the head and both shoulders are clearly visible.
+    front: &front >-
+      The bear faces the camera squarely and symmetrically, chest toward us,
+      both ears and both shoulders equally visible, snout pointing straight at
+      the camera. The camera is at the bear's chest height, level with the
+      bear.
+    Lprof: &Lprof >-
+      The bear's body is turned about 70 degrees so we see mostly its left
+      side, close to a profile: its left flank, left shoulder and the left side
+      of its muzzle face the camera, its right side is hidden behind its body,
+      and its snout points toward the left edge of the frame. The camera is at
+      the bear's chest height, level with the bear.
+    Rprof: &Rprof >-
+      The bear's body is turned about 70 degrees so we see mostly its right
+      side, close to a profile: its right flank, right shoulder and the right
+      side of its muzzle face the camera, its left side is hidden behind its
+      body, and its snout points toward the right edge of the frame. The camera
+      is at the bear's chest height, level with the bear.
+  poses:
+    reach: &reach >-
+      Its pose: both forelegs are raised high above its head and spread wide
+      apart, paws open with claws splayed, chest lifted and open.
+    bent: &bent >-
+      Its pose: both forelegs are raised with the elbows bent, the paws held
+      up at shoulder height in front of the chest, claws splayed.
+    tall: &tall >-
+      Its pose: it rears tall and straight, body stretched upward like a totem
+      pole, both forelegs raised close beside the head with the paws near the
+      ears, the whole figure narrow and vertical.
+    swipe: &swipe >-
+      Its pose: one foreleg is raised high above its head while the other
+      foreleg sweeps forward across the chest mid-swipe, claws splayed.
+  mass:
+    heavy: &heavy >-
+      Its build is massive and heavy: a thick short neck, a broad deep chest,
+      a big round belly, and short thick limbs with wide paws.
+    lean: &lean >-
+      Its build is lean and athletic: long limbs, a longer neck, a narrow
+      waist and a tapered muscular torso.
+  mouth:
+    open: &open >-
+      Its mouth is wide open in a roar, showing teeth.
+    closed: &closed >-
+      Its jaw is closed with the lips drawn back in a snarl, teeth just
+      showing.
+
+foreach:
+  - {id: r, seed: 2718, tag: "L34 bent closed",   view: *L34,   pose: *bent,  mass: *heavy, mouth: *closed}
+
+# ---- pipeline (instantiated once per item) -----------------------------------
+pipeline:
+  - fragment: prompt_builder
+    alias: pb
+    params:
+      subject: $var.subject
+      view:    $item.view
+      pose:    $item.pose
+      mass:    $item.mass
+      mouth:   $item.mouth
+      style:   $var.style
+
+  - fragment: t2i_zimage
+    alias: ref
+    inputs:
+      prompt: $pb.prompt
+    params:
+      ksampler_seed: $item.seed
+      negative: $var.negative
+      emptysd3latentimage_width:  1024
+      emptysd3latentimage_height: 1024
+      # Text encoder on CPU: keeps the 7.7 GB Qwen3-4B off the GPU so the graph
+      # peaks at ~13 GB instead of ~20 GB. With the GPU encoder, comfy-aimdo
+      # (NVML pressure) evicts weights whenever the llama-servers wake up and
+      # sampling stalls at 100% util (observed twice on 2026-09-10).
+      load_clip_device: cpu
+      # steps / cfg / sampler / scheduler / shift: fragment defaults from the
+      # image_z_image_turbo template (8 / 1 / res_multistep / simple / 3).
