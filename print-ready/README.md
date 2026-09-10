@@ -1,7 +1,6 @@
 # print-ready — files you can drop straight into the slicer
 
-**Status 2026-09-10 02:30:** none of these is the final bear yet — the user's verdict is that they are
-not fierce or grizzly enough; round 4 (`blueprints/stage1_refs_round4z.yaml`) is running for identity.
+**Status 2026-09-10 12:30:** the user chose round-4 `b` — `bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl`.
 
 Every STL here is a validated solid (watertight, consistent winding, Euler 2,
 manifold3d clean). Round-3 files use the recipe from `outputs/stage3_print/quality/report.md`:
