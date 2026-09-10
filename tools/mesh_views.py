@@ -2,13 +2,16 @@
 """
 mesh_views.py — six views of a mesh on one sheet, no GPU, no window.
 
-    python tools/mesh_views.py bear.glb
-    python tools/mesh_views.py bear.glb --out bear_views.png --height 160
+    python tools/mesh_views.py bear.glb --height 160
+    python tools/mesh_views.py bear_print.stl --out bear_print_views.png
 
 Front, left, back, right, top and a three-quarter view, orthographic, lit
 from over the viewer's left shoulder, dark mesh on a light ground, all six
-at the same scale. The footer carries the check_mesh.py numbers, so one
-image answers "does it look like a bear" and "will it print" together.
+at the same scale. Faces that need support (downward, shallower than
+--limit degrees, not resting on the plate) are tinted red so the sheet
+shows where the support goes, not only how much. The footer carries the
+check_mesh.py numbers, so one image answers "does it look like a bear" and
+"will it print" together.
 
 Views are named the way Blender names them. Front looks at the model's -Y
 face (glTF's forward, once check_mesh has stood it up); left looks from -X,
@@ -45,6 +48,8 @@ INK = "#2b2b2b"
 PLATE = "#b9b6ad"
 DARK = np.array([0.12, 0.13, 0.17])    # shadow side of the mesh
 LIGHT = np.array([0.58, 0.60, 0.64])   # lit side; still darker than the ground
+BAD_DARK = np.array([0.55, 0.10, 0.08])   # shadow side of a face that needs support
+BAD_LIGHT = np.array([0.95, 0.40, 0.30])  # lit side of the same
 KEY_LIGHT = np.array([-0.35, 0.50, 0.79])  # camera space: upper left, over the shoulder
 KEY_LIGHT /= np.linalg.norm(KEY_LIGHT)
 
@@ -93,11 +98,18 @@ def nice_length(target):
     return float(min((1, 2, 5), key=lambda m: abs(m * mag - target)) * mag)
 
 
-def draw_panel(ax, tris, normals, basis, center, radius, plate, title):
+def face_colors(normals, basis, bad):
+    """Lambert shading in camera space; red ramp for faces that need support."""
+    shade = np.abs((normals @ basis.T) @ KEY_LIGHT)[:, None]   # abs: don't punish bad winding
+    colors = DARK + (LIGHT - DARK) * shade
+    colors[bad] = BAD_DARK + (BAD_LIGHT - BAD_DARK) * shade[bad]
+    return colors
+
+
+def draw_panel(ax, tris, normals, bad, basis, center, radius, plate, title):
     P = np.einsum("ij,nkj->nki", basis, tris - center)      # camera-space triangles
     order = np.argsort(P[:, :, 2].mean(axis=1))              # far first
-    shade = np.abs((normals @ basis.T) @ KEY_LIGHT)          # abs: don't punish bad winding
-    colors = DARK + (LIGHT - DARK) * shade[:, None]
+    colors = face_colors(normals, basis, bad)
 
     ax.set_facecolor(BACKGROUND)
     Q = (plate - center) @ basis.T
@@ -133,15 +145,24 @@ def footer_line(info):
             f"needs support {info['unsupported_pct']:.1f}%{where}")
 
 
+def guess_unit(path, height):
+    """Scaled meshes and print-format files are in mm; a raw glTF is in whatever it likes."""
+    if height or Path(path).suffix.lower() not in cm.Y_UP_SUFFIXES:
+        return "mm"
+    return "units"
+
+
 def render(path, out=None, height=None, up="auto", render_faces=RENDER_FACES,
-           limit=cm.LIMIT_DEG):
+           limit=cm.LIMIT_DEG, unit=None):
     """Measure the full mesh, draw a decimated one. Returns (png path, measurements, up)."""
     up = cm.guess_up(path, up)
     mesh = cm.prepare(cm.load(path), up, height)
     info = cm.measure(mesh, limit)
+    unit = unit or guess_unit(path, height)
 
     draw = for_drawing(mesh, render_faces)
     tris, normals = draw.triangles, draw.face_normals
+    bad = cm.overhang_census(draw, limit)["mask"]
     lo, hi = mesh.bounds
     center = (lo + hi) / 2
     plate = np.array([[lo[0], lo[1], lo[2]], [hi[0], lo[1], lo[2]],
@@ -149,16 +170,18 @@ def render(path, out=None, height=None, up="auto", render_faces=RENDER_FACES,
     corners = trimesh.bounds.corners(mesh.bounds) - center
     radius = max(np.abs(corners @ camera(t).T[:, :2]).max() for _, t in VIEWS) * 1.06
 
-    unit = "mm" if height else "units"
     fig, axes = plt.subplots(2, 3, figsize=(15, 10.6), dpi=DPI, facecolor=BACKGROUND)
     for ax, (name, toward) in zip(axes.flat, VIEWS):
-        draw_panel(ax, tris, normals, camera(toward), center, radius, plate, name)
+        draw_panel(ax, tris, normals, bad, camera(toward), center, radius, plate, name)
     draw_scale_bar(axes[0, 0], nice_length(info["height"] / 4), unit, radius)
 
     fig.suptitle(Path(path).name, fontsize=15, color=INK, y=0.985)
-    fig.text(0.5, 0.018, footer_line(info), ha="center", fontsize=11, color=INK,
+    fig.text(0.5, 0.032, footer_line(info), ha="center", fontsize=11, color=INK,
              family="monospace")
-    fig.subplots_adjust(left=0.02, right=0.98, top=0.93, bottom=0.06,
+    fig.text(0.5, 0.010, f"red: faces that need support (downward, shallower than "
+                         f"{limit:g} deg, not on the plate)   dashed: build plate footprint",
+             ha="center", fontsize=8.5, color="#6b6b6b")
+    fig.subplots_adjust(left=0.02, right=0.98, top=0.93, bottom=0.07,
                         wspace=0.06, hspace=0.14)
 
     out = Path(out) if out else Path(path).with_name(Path(path).stem + "_views.png")
@@ -179,12 +202,14 @@ def main():
     ap.add_argument("--render-faces", type=int, default=RENDER_FACES,
                     help=f"decimate to this many faces for drawing (default {RENDER_FACES})")
     ap.add_argument("--limit", type=float, default=cm.LIMIT_DEG,
-                    help="overhang threshold in degrees for the footer")
+                    help="overhang threshold in degrees for the tint and the footer")
+    ap.add_argument("--unit", help="scale-bar unit label (default: mm, or 'units' for an "
+                                   "unscaled glTF)")
     args = ap.parse_args()
 
     t0 = time.time()
     out, info, up = render(args.path, args.out, args.height, args.up,
-                           args.render_faces, args.limit)
+                           args.render_faces, args.limit, args.unit)
     print(f"{args.path}  (up: {up})")
     print(f"  {footer_line(info)}")
     print(f"wrote {out}  ({time.time() - t0:.1f} s)")
