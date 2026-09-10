@@ -1,0 +1,38 @@
+# Stage 2 — image-to-3D (Hunyuan3D 2.1, local). One branch per chosen reference.
+#
+# Edit the `foreach` list after picking from the Stage 1 contact sheet:
+#   id      short handle; also names the output files
+#   ref     the reference PNG, promoted into assets/refs/<id>.png and pushed
+#           (`cp outputs/round2/<id>.png assets/refs/<id>.png && comfy assets push`)
+#   prefix  where the GLB lands (relative to ComfyUI's output dir)
+#   octree  VAEDecodeHunyuan3D octree resolution: 256 is fast, 384/512 is finer
+#   seed    KSampler seed for the shape diffusion
+#
+# Build with `python tools/build.py blueprints/stage2_mesh.yaml [--debug]`.
+# The tap after rembg saves the background-stripped cutout under debug/cutout/
+# only in a --debug build (or when un-bypassed in the browser view).
+output_prefix: outputs/round2/mesh
+foreach:
+  - {id: a, ref: $asset.refs/a.png, prefix: outputs/round2/mesh/a, octree: 256, seed: 1}
+  - {id: c, ref: $asset.refs/c.png, prefix: outputs/round2/mesh/c, octree: 256, seed: 1}
+pipeline:
+  - fragment: rembg
+    alias: cut
+    inputs:
+      image: $item.ref
+
+  - fragment: tap_image
+    alias: tap_cut
+    inputs:
+      image: $cut.image
+    params:
+      label: debug/cutout
+
+  - fragment: hy3d_i2m
+    alias: mesh
+    inputs:
+      clip_vision_encode_image: $cut.image
+    params:
+      save_3d_model_filename_prefix: $item.prefix
+      vaedecodehunyuan3d_octree_resolution: $item.octree
+      ksampler_seed: $item.seed
