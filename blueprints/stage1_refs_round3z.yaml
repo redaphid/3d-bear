@@ -1,0 +1,153 @@
+# Stage 1, round 3z — POSE-ENGINEERED FOR THE PRINTER (Z-Image Turbo).
+#
+# Round 2z taught us that support % is a pose question: the red faces on every
+# candidate were the undersides of horizontal forearms, the underside of the
+# muzzle, the armpits and the crotch. This matrix only contains poses whose
+# downward-facing surfaces are steep or pressed against the body:
+#   skyroar  arms straight up overhead, head thrown back (jaw underside faces forward)
+#   guard    elbows on the ribs, forearms vertical, paws beside the chin
+#   clasp    elbows on the ribs, forearms steeply up, paws meet under the chin
+#   oneup    one arm straight up, the other straight down the flank
+#   stump    both arms down the flanks — the totem column
+# and two ways of killing the crotch overhang: hind legs pressed together, or the
+# bear standing on a boulder that is part of the sculpture (the pole/light goes
+# into the rock). Half the matrix is the round-2 clay style, half a "cast bronze
+# with matte patina" style that asks for defined anatomy (hump, brow, claws) so
+# the reconstruction stops looking like a plush toy.
+#
+# Files land at D:/sync/Comfy/3d-bear/stage1_refs/round3z/ref/<id>_00001_.png
+output_prefix: 3d-bear/stage1_refs/round3z/ref
+chunk: 5
+
+_clauses:
+  subject: &subject >-
+    A full-body sculpture of a grizzly bear rearing upright on its hind legs,
+    massive and heavy: a pronounced shoulder hump, a thick short neck, a broad
+    deep chest, a big round belly, short thick limbs and wide paws with
+    distinct claws. The entire animal is visible from the top of its head to
+    the bottom of whatever it stands on.
+  views:
+    L34: &L34 >-
+      The bear's body is rotated about 45 degrees so its left side faces the
+      camera: its left shoulder, left ear and left flank are nearest to us
+      while its right side recedes away from us; its head points the same way
+      as its body, snout angled toward the left edge of the frame. The camera
+      is at the bear's chest height, level with the bear.
+    R34: &R34 >-
+      The bear's body is rotated about 45 degrees so its right side faces the
+      camera: its right shoulder, right ear and right flank are nearest to us
+      while its left side recedes away from us; its head points the same way
+      as its body, snout angled toward the right edge of the frame. The camera
+      is at the bear's chest height, level with the bear.
+  poses:
+    skyroar: &skyroar >-
+      Its pose: both forelegs are raised straight up overhead, upper arms
+      vertical beside the head, forearms vertical, paws open toward the sky
+      with claws splayed.
+    guard: &guard >-
+      Its pose: both forelegs are bent sharply at the elbow with the elbows
+      pressed tight against the ribs and the forearms pointing straight up,
+      paws raised beside the chin with claws splayed, like a boxer's guard.
+    clasp: &clasp >-
+      Its pose: both forelegs are bent with the elbows held against the ribs
+      and the forearms angled steeply upward, the two paws meeting together
+      just under the chin.
+    oneup: &oneup >-
+      Its pose: its left foreleg is raised straight up beside its head with
+      the paw open and claws splayed, while its right foreleg hangs straight
+      down along its right flank with the paw resting against its thigh.
+    stump: &stump >-
+      Its pose: both forelegs hang straight down at its sides, pressed against
+      the flanks, the whole figure tall, narrow and columnar like a totem pole.
+  bases:
+    legs: &legs >-
+      Its hind legs are pressed together with the thighs and lower legs
+      touching so there is no gap between them, and the two hind paws stand
+      flat side by side on the ground.
+    rock: &rock >-
+      It stands on top of a single large smooth rounded boulder with a flat
+      bottom; its hind paws are planted on the top of the boulder and the
+      boulder is part of the same sculpture in the same material. The boulder
+      is the only thing under the bear.
+  heads:
+    sky: &sky >-
+      Its head is thrown back with the muzzle pointing straight up at the sky
+      and the mouth wide open in a roar, so the throat and the underside of
+      the jaw face forward.
+    closed: &closed >-
+      Its head faces forward with the jaw closed and the lips drawn back in a
+      snarl, teeth just showing.
+    tuck: &tuck >-
+      Its head is lowered with the chin tucked down against the chest, jaw
+      closed, glaring forward from under a heavy brow.
+  styles:
+    clay: &clay >-
+      Rendered as a matte clay maquette: smooth simplified sculptural forms,
+      soft rounded volumes, no fur texture, no hair strands, uniform light
+      grey clay, completely non-reflective matte surface. The whole sculpture
+      is centred in the frame with generous empty margin on all sides,
+      nothing cropped, nothing touching the frame edge. Plain flat uniform
+      mid-grey studio background, seamless, empty, no scene, no environment,
+      no floor line, no horizon. Perfectly even flat diffuse shadowless
+      lighting from all directions, no cast shadow, no drop shadow, no
+      contact shadow, no dark areas, very low contrast. Clean product
+      photograph of a sculpture.
+    bronze: &bronze >-
+      Rendered as a cast bronze sculpture with a uniform matte light-grey
+      patina: smooth continuous surfaces with clearly defined muscle masses,
+      a heavy brow, a long broad muzzle, distinct ears and claws, no fur
+      strands, no surface texture, completely non-reflective. The whole
+      sculpture is centred in the frame with generous empty margin on all
+      sides, nothing cropped, nothing touching the frame edge. Plain flat
+      uniform mid-grey studio background, seamless, empty, no scene, no
+      environment, no floor line, no horizon. Perfectly even flat diffuse
+      shadowless lighting from all directions, no cast shadow, no drop
+      shadow, no contact shadow, no dark areas, very low contrast. Clean
+      product photograph of a sculpture.
+
+# ---- design matrix: 5 poses x 2 bases x 2 styles, heads chosen to suit ---------
+foreach:
+  - {id: a, seed: 3001, tag: "L34 skyroar legs sky clay",    view: *L34, pose: *skyroar, base: *legs, head: *sky,    style: *clay}
+  - {id: b, seed: 3102, tag: "R34 skyroar rock sky clay",    view: *R34, pose: *skyroar, base: *rock, head: *sky,    style: *clay}
+  - {id: c, seed: 3203, tag: "L34 guard legs closed clay",   view: *L34, pose: *guard,   base: *legs, head: *closed, style: *clay}
+  - {id: d, seed: 3304, tag: "R34 guard rock closed clay",   view: *R34, pose: *guard,   base: *rock, head: *closed, style: *clay}
+  - {id: e, seed: 3405, tag: "L34 clasp legs sky clay",      view: *L34, pose: *clasp,   base: *legs, head: *sky,    style: *clay}
+  - {id: f, seed: 3506, tag: "R34 clasp rock closed clay",   view: *R34, pose: *clasp,   base: *rock, head: *closed, style: *clay}
+  - {id: g, seed: 3607, tag: "L34 oneup legs closed clay",   view: *L34, pose: *oneup,   base: *legs, head: *closed, style: *clay}
+  - {id: h, seed: 3708, tag: "R34 oneup rock sky clay",      view: *R34, pose: *oneup,   base: *rock, head: *sky,    style: *clay}
+  - {id: i, seed: 3809, tag: "L34 stump legs tuck clay",     view: *L34, pose: *stump,   base: *legs, head: *tuck,   style: *clay}
+  - {id: j, seed: 3910, tag: "R34 stump rock sky clay",      view: *R34, pose: *stump,   base: *rock, head: *sky,    style: *clay}
+  - {id: k, seed: 4011, tag: "L34 skyroar legs sky bronze",  view: *L34, pose: *skyroar, base: *legs, head: *sky,    style: *bronze}
+  - {id: l, seed: 4112, tag: "R34 skyroar rock sky bronze",  view: *R34, pose: *skyroar, base: *rock, head: *sky,    style: *bronze}
+  - {id: m, seed: 4213, tag: "L34 guard legs tuck bronze",   view: *L34, pose: *guard,   base: *legs, head: *tuck,   style: *bronze}
+  - {id: n, seed: 4314, tag: "R34 guard rock closed bronze", view: *R34, pose: *guard,   base: *rock, head: *closed, style: *bronze}
+  - {id: o, seed: 4415, tag: "L34 clasp legs closed bronze", view: *L34, pose: *clasp,   base: *legs, head: *closed, style: *bronze}
+  - {id: p, seed: 4516, tag: "R34 clasp rock sky bronze",    view: *R34, pose: *clasp,   base: *rock, head: *sky,    style: *bronze}
+  - {id: q, seed: 4617, tag: "L34 oneup legs tuck bronze",   view: *L34, pose: *oneup,   base: *legs, head: *tuck,   style: *bronze}
+  - {id: r, seed: 4718, tag: "R34 oneup rock closed bronze", view: *R34, pose: *oneup,   base: *rock, head: *closed, style: *bronze}
+  - {id: s, seed: 4819, tag: "L34 stump legs closed bronze", view: *L34, pose: *stump,   base: *legs, head: *closed, style: *bronze}
+  - {id: t, seed: 4920, tag: "R34 stump rock tuck bronze",   view: *R34, pose: *stump,   base: *rock, head: *tuck,   style: *bronze}
+
+# ---- pipeline (instantiated once per item) -----------------------------------
+# prompt_builder's six slots are reused as subject · view · pose · base · head · style.
+pipeline:
+  - fragment: prompt_builder
+    alias: pb
+    params:
+      subject: *subject
+      view:    $item.view
+      pose:    $item.pose
+      mass:    $item.base
+      mouth:   $item.head
+      style:   $item.style
+
+  - fragment: t2i_zimage
+    alias: ref
+    inputs:
+      prompt: $pb.prompt
+    params:
+      ksampler_seed: $item.seed
+      negative: $var.negative
+      emptysd3latentimage_width:  1024
+      emptysd3latentimage_height: 1024
+      load_clip_device: cpu
