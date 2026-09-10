@@ -1,0 +1,121 @@
+# Stage 1, round 4z — FIERCE, UNMISTAKABLY A GRIZZLY (Z-Image Turbo).
+#
+# Round 3z solved printability (rock plinth, head up, arms overhead/one-up) but the user's verdict on
+# the winner was: not fierce, not recognisably a grizzly. This matrix is about identity. Every prompt
+# names the field marks that distinguish a grizzly from a black bear or a toy:
+#   the shoulder hump · the dished (concave) face profile with a broad short muzzle and a wide nose
+#   · small round ears set wide · long straight pale claws · massive neck · heavy furrowed brow ·
+#   lips drawn back showing the canines, muzzle wrinkled in a snarl.
+# The face stays visible from the front (snarling forward or raised ~30°), which re-admits a little
+# muzzle overhang (~1 point) — accepted. Rock base is kept (worth 1–2 points, free). Arms are
+# overhead or one-up (printable) plus two classic paws-forward threat poses for the look.
+# Styles: the proven bronze, and a museum-grade realistic sculpture with fur massed in bold clumps.
+#
+# Files land at D:/sync/Comfy/3d-bear/stage1_refs/round4z/ref/<id>_00001_.png
+output_prefix: 3d-bear/stage1_refs/round4z/ref
+chunk: 5
+
+_clauses:
+  subject: &subject >-
+    A full-body sculpture of an enormous adult male grizzly bear (Ursus arctos horribilis) rearing
+    upright on its hind legs, unmistakably a grizzly: a huge pronounced hump of muscle over the
+    shoulders, a dished concave face profile with a broad short muzzle and a wide black nose, small
+    rounded ears set wide apart, a massive thick neck, a heavy furrowed brow over small deep-set eyes,
+    and long straight pale claws on the forepaws. It stands on top of a single large rough boulder
+    with a flat bottom that is part of the same sculpture; the whole animal and the boulder are
+    visible.
+  views:
+    front: &front >-
+      The bear faces the camera squarely, chest toward us, both ears and both shoulders visible,
+      the hump rising above the head line; the camera is at the bear's chest height.
+    L34: &L34 >-
+      The bear's body is rotated about 35 degrees so its left shoulder and left flank are nearest
+      the camera and the shoulder hump reads clearly in profile against the sky; its head is turned
+      toward the camera so the face is fully visible; the camera is at the bear's chest height.
+  arms:
+    overhead: &overhead >-
+      Its pose: both forelegs raised straight up overhead beside the head, the forepaws open with
+      the long claws spread wide.
+    oneup: &oneup >-
+      Its pose: its left foreleg is raised straight up beside its head with the paw open and claws
+      spread, its right foreleg hangs down along the flank with the claws extended.
+    threat: &threat >-
+      Its pose: both forelegs held out in front of the chest at shoulder height, elbows bent, the
+      huge forepaws turned toward the viewer with the long claws splayed, the classic grizzly threat
+      display.
+  heads:
+    snarl: &snarl >-
+      Its head is thrust forward, mouth wide open in a roar with the lips drawn back to bare long
+      canine teeth, the muzzle wrinkled, the brow furrowed, ears pinned back: pure aggression.
+    roar_up: &roar_up >-
+      Its head is raised about 30 degrees, mouth wide open in a roar with the lips drawn back to
+      bare long canine teeth and the tongue visible, the brow furrowed, ears pinned back.
+    jaws: &jaws >-
+      Its jaws are open in a snarl showing the canines, the head level and turned slightly toward
+      the camera, the brow furrowed, small eyes glaring.
+  styles:
+    bronze: &bronze >-
+      Rendered as a cast bronze sculpture with a uniform matte light-grey patina: smooth continuous
+      surfaces with clearly defined muscle masses and anatomy, the hump, brow, muzzle, ears and
+      claws all sharply modelled, no fine fur strands, completely non-reflective. The whole
+      sculpture is centred in the frame with generous empty margin on all sides, nothing cropped,
+      nothing touching the frame edge. Plain flat uniform mid-grey studio background, seamless,
+      empty, no scene, no floor line, no horizon. Perfectly even flat diffuse shadowless lighting
+      from all directions, no cast shadow, no drop shadow, no contact shadow, very low contrast.
+      Clean product photograph of a sculpture.
+    museum: &museum >-
+      Rendered as a museum-grade realistic sculpture in matte light-grey resin: anatomically exact
+      grizzly, the fur massed into bold sculpted clumps and a thick shaggy ruff around the neck and
+      shoulders, but no individual hair strands and no fine texture; the hump, brow, muzzle, teeth,
+      ears and claws all crisply modelled; completely non-reflective. The whole sculpture is
+      centred in the frame with generous empty margin on all sides, nothing cropped, nothing
+      touching the frame edge. Plain flat uniform mid-grey studio background, seamless, empty, no
+      scene, no floor line, no horizon. Perfectly even flat diffuse shadowless lighting from all
+      directions, no cast shadow, no drop shadow, no contact shadow, very low contrast. Clean
+      product photograph of a sculpture.
+
+# ---- design matrix: arms x head x style, mostly frontal so the face reads ---------------------
+foreach:
+  - {id: a, seed: 5001, tag: "front overhead snarl bronze",   view: *front, arms: *overhead, head: *snarl,   style: *bronze}
+  - {id: b, seed: 5102, tag: "front overhead roar_up bronze", view: *front, arms: *overhead, head: *roar_up, style: *bronze}
+  - {id: c, seed: 5203, tag: "front oneup snarl bronze",      view: *front, arms: *oneup,    head: *snarl,   style: *bronze}
+  - {id: d, seed: 5304, tag: "L34 oneup jaws bronze",         view: *L34,   arms: *oneup,    head: *jaws,    style: *bronze}
+  - {id: e, seed: 5405, tag: "front threat snarl bronze",     view: *front, arms: *threat,   head: *snarl,   style: *bronze}
+  - {id: f, seed: 5506, tag: "L34 overhead roar_up bronze",   view: *L34,   arms: *overhead, head: *roar_up, style: *bronze}
+  - {id: g, seed: 5607, tag: "front oneup roar_up bronze",    view: *front, arms: *oneup,    head: *roar_up, style: *bronze}
+  - {id: h, seed: 5708, tag: "front overhead jaws bronze",    view: *front, arms: *overhead, head: *jaws,    style: *bronze}
+  - {id: i, seed: 5809, tag: "L34 threat jaws bronze",        view: *L34,   arms: *threat,   head: *jaws,    style: *bronze}
+  - {id: j, seed: 5910, tag: "front oneup jaws bronze",       view: *front, arms: *oneup,    head: *jaws,    style: *bronze}
+  - {id: k, seed: 6011, tag: "front overhead snarl museum",   view: *front, arms: *overhead, head: *snarl,   style: *museum}
+  - {id: l, seed: 6112, tag: "front overhead roar_up museum", view: *front, arms: *overhead, head: *roar_up, style: *museum}
+  - {id: m, seed: 6213, tag: "front oneup snarl museum",      view: *front, arms: *oneup,    head: *snarl,   style: *museum}
+  - {id: n, seed: 6314, tag: "L34 oneup jaws museum",         view: *L34,   arms: *oneup,    head: *jaws,    style: *museum}
+  - {id: o, seed: 6415, tag: "front threat snarl museum",     view: *front, arms: *threat,   head: *snarl,   style: *museum}
+  - {id: p, seed: 6516, tag: "L34 overhead roar_up museum",   view: *L34,   arms: *overhead, head: *roar_up, style: *museum}
+  - {id: q, seed: 6617, tag: "front oneup roar_up museum",    view: *front, arms: *oneup,    head: *roar_up, style: *museum}
+  - {id: r, seed: 6718, tag: "front overhead jaws museum",    view: *front, arms: *overhead, head: *jaws,    style: *museum}
+  - {id: s, seed: 6819, tag: "L34 threat jaws museum",        view: *L34,   arms: *threat,   head: *jaws,    style: *museum}
+  - {id: t, seed: 6920, tag: "front oneup jaws museum",       view: *front, arms: *oneup,    head: *jaws,    style: *museum}
+
+# ---- pipeline: prompt_builder slots reused as subject · view · arms · head · (empty) · style --------
+pipeline:
+  - fragment: prompt_builder
+    alias: pb
+    params:
+      subject: *subject
+      view:    $item.view
+      pose:    $item.arms
+      mass:    $item.head
+      mouth:   ""
+      style:   $item.style
+
+  - fragment: t2i_zimage
+    alias: ref
+    inputs:
+      prompt: $pb.prompt
+    params:
+      ksampler_seed: $item.seed
+      negative: $var.negative
+      emptysd3latentimage_width:  1024
+      emptysd3latentimage_height: 1024
+      load_clip_device: cpu

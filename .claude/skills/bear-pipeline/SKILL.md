@@ -15,7 +15,7 @@ Read first: `APPROACH.md` (method + measured findings), `PIPELINE.md` (reference
 | 1 references | `python tools/build.py blueprints/stage1_refs_z.yaml` → `comfy --json run --workflow blueprints/stage1_refs_z.compiled.00N.json` (one per chunk) | `D:\sync\Comfy\3d-bear\stage1_refs\<round>\ref\<id>_00001_.png` |
 | 1 sheet | `python tools/sheet.py outputs/stage1_refs/<round> --items …/items.json --cols 5 --out …/sheet.png` | contact sheet, pick by id |
 | 2 reconstruct | copy refs to `assets/<round>/<id>.png` → `python tools/push_assets.py` → `python tools/build.py blueprints/stage2_round2z.yaml --debug` → run each chunk | `…\3d-bear\stage2_mesh\<round>\<id>_00001_.glb` + cutout taps under `…\debug\…` |
-| 3 print | `python tools/mesh_repair.py outputs/stage2_mesh/<round>/<id>.glb --out outputs/stage3_print/<round>/<id>_print.stl --height 160 --open-base --pitch 0.4 --iso 0.7 --faces 25000 --smooth --fill-legs hull --views` (the measured recipe: `outputs/stage3_print/quality/report.md`; ~30 s/bear) | validated STL + six-view sheet |
+| 3 print | `python tools/mesh_repair.py outputs/stage2_mesh/<round>/<id>.glb --out outputs/stage3_print/<round>/<id>_print.stl --height 160 --open-base --pitch 0.4 --iso 0.7 --faces 25000 --smooth --views` (the measured recipe: `outputs/stage3_print/quality/report.md`; ~20 s/bear). **Never `--fill-legs`**: the user rejected the block between the legs as "a wall in front of them". | validated STL + six-view sheet |
 | ship | copy to `print-ready/bear-<id>-<pose>-160mm.stl` + `preview-bear-<id>.png`, update `print-ready/README.md` | what the slicer gets |
 
 Mirror server outputs into the project with `python tools/collect.py` (byte-for-byte —
