@@ -5,7 +5,7 @@ watertight solid, and printed hollow in glow-in-the-dark filament to be lit from
 inside on a pole. A totem for Goldrush 2026.
 
 **Want a bear right now?** `print-ready/` has validated STLs with previews and slicer
-settings. `bear-r3l-bronze-sky-roar-on-rock-160mm.stl` is the recommended one (1.8 % support).
+settings. `bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl` is the one the user chose (3.0 % support).
 
 **Want the story?** `docs/index.html` is the showcase (GitHub Pages).
 

@@ -132,6 +132,34 @@ Shipped to `print-ready/`: `bear-r3l-bronze-sky-roar-on-rock-160mm.stl` (**recom
 r3k, r3b and r3d. Infrastructure findings from the same night (commit-limit deaths, Ollama's supervisor
 loop and 20-second warm client) are in the `comfy-local-ops` skill and `docs/OLLAMA_ON_SOUL.md`.
 
+### Round 4z (2026-09-10 12:00–12:24): identity over overhang — the chosen bear
+
+After round 3 the user's verdict was "much more fierce and recognizable as a GRIZZLY bear, distinctive
+features" and "don't fill between legs". Round 4 (`blueprints/stage1_refs_round4z.yaml`) put the field
+marks into every prompt (shoulder hump, dished face with a broad short muzzle, small round ears, long
+straight claws, massive neck, furrowed brow, lips drawn back over the canines), kept the rock and the
+printable arm poses, let the face come forward (snarl / roar raised 30° / open jaws) and split the
+matrix between the bronze style and a "museum-grade sculpture with fur massed in bold clumps" style.
+All twenty reconstructed at 256/30/0.6 and repaired with the quality recipe, **no leg fill**.
+
+Post-repair support: h 2.3 · b 3.0 · f 3.5 · d 3.7 · r 3.7 · a 3.8 (needed `--pitch 0.6`: the shell
+leaked at 0.4) · q 4.0 · n 4.1 · k 4.3 · j 4.6 · t 4.7 · m 4.8 · e 4.8 · g 5.0 · s 5.1 · i 5.4 ·
+p 5.4 · o 5.6 · l 5.6 · c 5.8. Thirteen of twenty under the gate with the face visible.
+
+- **The user chose `b`** (front, arms overhead, roar raised 30°, bronze): a grizzly with the jaw open
+  and canines showing, claws, on the rock, at 3.0 %. Shipped as
+  `print-ready/bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl`.
+- **Naming the field marks works.** Every one of the twenty references reads as a grizzly; round 3's
+  "bronze with a heavy brow" line had not been enough. Z-Image's faces tend to wide-eyed rather than
+  furious; the roar/jaws variants carry the aggression, the "snarl" clause does not add much.
+- **The carved-fur (museum) style survives reconstruction as a lumpy muscular hide**, not noise; the
+  bronze style stays smoother. Both are usable; the user preferred bronze.
+- **Forward-facing heads cost about a point** (muzzle underside) against the sky-roar of round 3, which
+  is the price of a visible face. Arms-down and paws-forward poses (e, o) are the most animal-like
+  in the round and cost 1–2 points more for their forearm undersides.
+- **A leaky Hunyuan shell** (round-4 `a`: flood fill escaped, footprint reported in metres) is fixed by
+  a coarser pitch; the signature is documented in the `mesh-print-prep` skill.
+
 ## 4. Division of labour (this session)
 
 | Agent | Owns | Delivers |
@@ -168,21 +196,19 @@ outputs/
 - Is `fill_holes` enough to make 2.1 output watertight, or is a manifold rebuild needed? (`mesh_repair.py` pending)
 - Multi-view Hunyuan3D (`hunyuan3d-dit-v2-mv`) is not on disk; only fetch it if the backs are bad.
 
-## 7. State at handoff (2026-09-10, ~02:20)
+## 7. State at handoff (2026-09-10, ~12:30)
 
-**Done.** Three reference rounds (60 candidates), 46 reconstructions, the Hunyuan parameter sweep (null at
-print scale), the repair chain, and round 3z's pose-engineered matrix that put 17 of 20 bears under the
-5 % support gate. **Print `print-ready/bear-r3l-bronze-sky-roar-on-rock-160mm.stl`** (1.8 % support,
-82 × 64 mm, 160 mm tall, opening in the plinth). Showcase at `docs/index.html`.
+**Done.** Four reference rounds (80 candidates), 66 reconstructions, the Hunyuan parameter sweep, the
+repair chain and its measured quality recipe, and two pose/identity rounds. **The user chose round-4
+`b`: `print-ready/bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl`** (bronze grizzly roaring with
+both arms up on a rock plinth; watertight; 3.0 % support; 94 × 71 mm; 160 mm tall; opening in the
+plinth). Showcase at `docs/index.html` (rounds 3–4 not yet on it).
 
 **Next steps, in order.**
-1. Print `r3l`. Slicer settings in `print-ready/README.md`. Test the wall/glow question on a 100 mm copy
-   first if unsure (`mesh_repair.py --height 100`).
-2. Crotch: the only red left on every bear. `mesh_repair.py --fill-legs` (in progress in
-   `outputs/stage3_print/quality/report.md`) or a reference prompt that actually closes the legs.
-3. Surface quality: the pitch / faces / smoothing grid in the same report decides whether to move off
-   0.6 mm / 12k faces.
-4. Round 4, if wanted: bronze prompt only, sky-roar or one-arm-up only, rock only, 20 seeds — everything
-   else in the matrix is settled.
-5. Machine: kill the Ollama supervisor loop before any long GPU job (`docs/OLLAMA_ON_SOUL.md`); consider
-   `wsl --shutdown` for 55 GB of commit headroom.
+1. Print `r4b`. Slicer settings in `print-ready/README.md`; a 100 mm coupon first if the wall/glow is
+   still an open question (`mesh_repair.py --height 100`).
+2. If the face needs more bite at print scale, a Qwen-Image 2512 re-render of `b`'s prompt (better
+   adherence than Z-Image; needs Ollama truly down and the box at < 115 GB commit) and a 384-octree
+   reconstruction are the two knobs left; everything else is measured as null.
+3. Add rounds 3–4 to the showcase (a "what fierce cost" spread: r3l 1.8 % vs r4b 3.0 %).
+4. Machine: kill the Ollama supervisor loop before any long GPU job (`docs/OLLAMA_ON_SOUL.md`).
