@@ -1,0 +1,16 @@
+# Throwaway baseline: round-1 frontal reference 'd' -> rembg -> Hunyuan3D 2.1.
+# Purpose: first mesh to look at while the Stage-1 sweep builds; tests the
+# "frontal reference gives a flat back" risk empirically. Not part of the pipeline.
+output_prefix: outputs/scratch/hy3d_round1
+pipeline:
+  - fragment: rembg
+    alias: cut
+    inputs:
+      image: $asset.round1/ref_d.png
+  - fragment: hy3d_i2m
+    alias: mesh
+    inputs:
+      clip_vision_encode_image: $cut.image
+    params:
+      save_3d_model_filename_prefix: outputs/scratch/mesh_round1_d
+      ksampler_seed: 7

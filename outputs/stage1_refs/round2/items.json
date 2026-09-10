@@ -1,0 +1,162 @@
+{
+  "a": {
+    "tag": "L34 reach heavy",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised high above its head and spread wide apart, paws open with claws splayed, chest lifted and open.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1001
+  },
+  "b": {
+    "tag": "R34 reach heavy",
+    "view": "The bear's body is rotated about 45 degrees so its right side faces the camera: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised high above its head and spread wide apart, paws open with claws splayed, chest lifted and open.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1102
+  },
+  "c": {
+    "tag": "L34 bent heavy",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised with the elbows bent, the paws held up at shoulder height in front of the chest, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1203
+  },
+  "d": {
+    "tag": "R34 bent heavy",
+    "view": "The bear's body is rotated about 45 degrees so its right side faces the camera: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised with the elbows bent, the paws held up at shoulder height in front of the chest, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1304
+  },
+  "e": {
+    "tag": "L34hi bent heavy",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is slightly above the bear's eye level looking gently downward, so the top of the head and both shoulders are clearly visible.",
+    "pose": "Its pose: both forelegs are raised with the elbows bent, the paws held up at shoulder height in front of the chest, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1405
+  },
+  "f": {
+    "tag": "R34hi reach heavy",
+    "view": "The bear's body is rotated about 45 degrees so its right side faces the camera: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame. The camera is slightly above the bear's eye level looking gently downward, so the top of the head and both shoulders are clearly visible.",
+    "pose": "Its pose: both forelegs are raised high above its head and spread wide apart, paws open with claws splayed, chest lifted and open.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1506
+  },
+  "g": {
+    "tag": "L34 tall heavy",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: it rears tall and straight, body stretched upward like a totem pole, both forelegs raised close beside the head with the paws near the ears, the whole figure narrow and vertical.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1607
+  },
+  "h": {
+    "tag": "R34 tall heavy",
+    "view": "The bear's body is rotated about 45 degrees so its right side faces the camera: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: it rears tall and straight, body stretched upward like a totem pole, both forelegs raised close beside the head with the paws near the ears, the whole figure narrow and vertical.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1708
+  },
+  "i": {
+    "tag": "L34hi tall closed",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is slightly above the bear's eye level looking gently downward, so the top of the head and both shoulders are clearly visible.",
+    "pose": "Its pose: it rears tall and straight, body stretched upward like a totem pole, both forelegs raised close beside the head with the paws near the ears, the whole figure narrow and vertical.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its jaw is closed with the lips drawn back in a snarl, teeth just showing.",
+    "seed": 1809
+  },
+  "j": {
+    "tag": "L34 swipe heavy",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: one foreleg is raised high above its head while the other foreleg sweeps forward across the chest mid-swipe, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 1910
+  },
+  "k": {
+    "tag": "R34 swipe heavy",
+    "view": "The bear's body is rotated about 45 degrees so its right side faces the camera: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: one foreleg is raised high above its head while the other foreleg sweeps forward across the chest mid-swipe, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 2011
+  },
+  "l": {
+    "tag": "front bent heavy",
+    "view": "The bear faces the camera squarely and symmetrically, chest toward us, both ears and both shoulders equally visible, snout pointing straight at the camera. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised with the elbows bent, the paws held up at shoulder height in front of the chest, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 2112
+  },
+  "m": {
+    "tag": "front tall heavy",
+    "view": "The bear faces the camera squarely and symmetrically, chest toward us, both ears and both shoulders equally visible, snout pointing straight at the camera. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: it rears tall and straight, body stretched upward like a totem pole, both forelegs raised close beside the head with the paws near the ears, the whole figure narrow and vertical.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 2213
+  },
+  "n": {
+    "tag": "Lprof reach heavy",
+    "view": "The bear's body is turned about 70 degrees so we see mostly its left side, close to a profile: its left flank, left shoulder and the left side of its muzzle face the camera, its right side is hidden behind its body, and its snout points toward the left edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised high above its head and spread wide apart, paws open with claws splayed, chest lifted and open.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 2314
+  },
+  "o": {
+    "tag": "Rprof bent closed",
+    "view": "The bear's body is turned about 70 degrees so we see mostly its right side, close to a profile: its right flank, right shoulder and the right side of its muzzle face the camera, its left side is hidden behind its body, and its snout points toward the right edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised with the elbows bent, the paws held up at shoulder height in front of the chest, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its jaw is closed with the lips drawn back in a snarl, teeth just showing.",
+    "seed": 2415
+  },
+  "p": {
+    "tag": "L34 reach lean",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised high above its head and spread wide apart, paws open with claws splayed, chest lifted and open.",
+    "mass": "Its build is lean and athletic: long limbs, a longer neck, a narrow waist and a tapered muscular torso.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 2516
+  },
+  "q": {
+    "tag": "R34 bent lean",
+    "view": "The bear's body is rotated about 45 degrees so its right side faces the camera: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised with the elbows bent, the paws held up at shoulder height in front of the chest, claws splayed.",
+    "mass": "Its build is lean and athletic: long limbs, a longer neck, a narrow waist and a tapered muscular torso.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 2617
+  },
+  "r": {
+    "tag": "L34 bent closed",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: both forelegs are raised with the elbows bent, the paws held up at shoulder height in front of the chest, claws splayed.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its jaw is closed with the lips drawn back in a snarl, teeth just showing.",
+    "seed": 2718
+  },
+  "s": {
+    "tag": "R34 tall closed",
+    "view": "The bear's body is rotated about 45 degrees so its right side faces the camera: its right shoulder, right ear and right flank are nearest to us while its left side recedes away from us; its head points the same way as its body, snout angled toward the right edge of the frame. The camera is at the bear's chest height, level with the bear.",
+    "pose": "Its pose: it rears tall and straight, body stretched upward like a totem pole, both forelegs raised close beside the head with the paws near the ears, the whole figure narrow and vertical.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its jaw is closed with the lips drawn back in a snarl, teeth just showing.",
+    "seed": 2819
+  },
+  "t": {
+    "tag": "L34hi reach heavy",
+    "view": "The bear's body is rotated about 45 degrees so its left side faces the camera: its left shoulder, left ear and left flank are nearest to us while its right side recedes away from us; its head points the same way as its body, snout angled toward the left edge of the frame. The camera is slightly above the bear's eye level looking gently downward, so the top of the head and both shoulders are clearly visible.",
+    "pose": "Its pose: both forelegs are raised high above its head and spread wide apart, paws open with claws splayed, chest lifted and open.",
+    "mass": "Its build is massive and heavy: a thick short neck, a broad deep chest, a big round belly, and short thick limbs with wide paws.",
+    "mouth": "Its mouth is wide open in a roar, showing teeth.",
+    "seed": 2920
+  }
+}

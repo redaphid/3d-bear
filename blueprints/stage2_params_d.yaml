@@ -1,0 +1,49 @@
+# Stage 2 — Hunyuan3D 2.1 parameter sweep on the round-1 frontal reference 'd'.
+# Purpose: learn which decode/sampling settings are worth paying for before the
+# 20 round-2 candidates are reconstructed. Every item is the same reference and
+# the same pipeline (rembg -> hy3d_i2m); only the named params vary.
+#
+#   id         handle; names the GLB under 3d-bear/stage2_params/d/<id>
+#   octree     VAEDecodeHunyuan3D octree_resolution (256 fast, 384/512 finer)
+#   steps      KSampler steps for the shape diffusion
+#   threshold  VoxelToMesh iso threshold (0.6 is the template default)
+#   seed       KSampler seed (1 is the baseline; seed2/seed3 test variance)
+#
+# `chunk: 1` compiles one job per item so each variant fails, finishes and is
+# collected independently; ComfyUI's content-addressed cache still shares the
+# KSampler / VAEDecode work between items that only differ downstream.
+# Build: python tools/build.py blueprints/stage2_params_d.yaml --debug
+output_prefix: 3d-bear/stage2_params/d
+chunk: 1
+foreach:
+  - {id: o256_s30,       octree: 256, steps: 30, threshold: 0.6, seed: 1, prefix: 3d-bear/stage2_params/d/o256_s30,       cutout: debug/3d-bear/stage2_params/d/o256_s30_cutout}
+  - {id: o384_s30,       octree: 384, steps: 30, threshold: 0.6, seed: 1, prefix: 3d-bear/stage2_params/d/o384_s30,       cutout: debug/3d-bear/stage2_params/d/o384_s30_cutout}
+  - {id: o384_s30_t05,   octree: 384, steps: 30, threshold: 0.5, seed: 1, prefix: 3d-bear/stage2_params/d/o384_s30_t05,   cutout: debug/3d-bear/stage2_params/d/o384_s30_t05_cutout}
+  - {id: o384_s30_t07,   octree: 384, steps: 30, threshold: 0.7, seed: 1, prefix: 3d-bear/stage2_params/d/o384_s30_t07,   cutout: debug/3d-bear/stage2_params/d/o384_s30_t07_cutout}
+  - {id: o384_s30_seed2, octree: 384, steps: 30, threshold: 0.6, seed: 2, prefix: 3d-bear/stage2_params/d/o384_s30_seed2, cutout: debug/3d-bear/stage2_params/d/o384_s30_seed2_cutout}
+  - {id: o384_s30_seed3, octree: 384, steps: 30, threshold: 0.6, seed: 3, prefix: 3d-bear/stage2_params/d/o384_s30_seed3, cutout: debug/3d-bear/stage2_params/d/o384_s30_seed3_cutout}
+  - {id: o384_s50,       octree: 384, steps: 50, threshold: 0.6, seed: 1, prefix: 3d-bear/stage2_params/d/o384_s50,       cutout: debug/3d-bear/stage2_params/d/o384_s50_cutout}
+  - {id: o512_s30,       octree: 512, steps: 30, threshold: 0.6, seed: 1, prefix: 3d-bear/stage2_params/d/o512_s30,       cutout: debug/3d-bear/stage2_params/d/o512_s30_cutout}
+pipeline:
+  - fragment: rembg
+    alias: cut
+    inputs:
+      image: $asset.round1/ref_d.png
+
+  - fragment: tap_image
+    alias: tap_cut
+    inputs:
+      image: $cut.image
+    params:
+      label: $item.cutout
+
+  - fragment: hy3d_i2m
+    alias: mesh
+    inputs:
+      clip_vision_encode_image: $cut.image
+    params:
+      save_3d_model_filename_prefix: $item.prefix
+      vaedecodehunyuan3d_octree_resolution: $item.octree
+      ksampler_steps: $item.steps
+      voxel_to_mesh_threshold: $item.threshold
+      ksampler_seed: $item.seed

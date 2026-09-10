@@ -1,0 +1,17 @@
+# Stage 2 — control: does the grey background hurt Hunyuan3D?
+# Same reference 'd' and the o384_s30 settings from stage2_params_d.yaml, but
+# the image goes STRAIGHT into hy3d_i2m with no rembg pass. Compare against
+# 3d-bear/stage2_params/d/o384_s30.
+# Build: python tools/build.py blueprints/stage2_nobg_d.yaml
+output_prefix: 3d-bear/stage2_params/d
+pipeline:
+  - fragment: hy3d_i2m
+    alias: mesh
+    inputs:
+      clip_vision_encode_image: $asset.round1/ref_d.png
+    params:
+      save_3d_model_filename_prefix: 3d-bear/stage2_params/d/nobg_o384_s30
+      vaedecodehunyuan3d_octree_resolution: 384
+      ksampler_steps: 30
+      voxel_to_mesh_threshold: 0.6
+      ksampler_seed: 1
