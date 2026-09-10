@@ -78,6 +78,8 @@ def main() -> int:
     ap.add_argument("--thickness", type=float, default=4.0, help="bail only: slab thickness along the hole axis, mm")
     ap.add_argument("--web", type=float, default=3.0, help="bail only: material either side of the hole, mm")
     ap.add_argument("--hole-z", type=float, default=0.90, help="hole style only: height of the bore as a fraction of the model height")
+    ap.add_argument("--through", choices=["head", "all"], default="head",
+                    help="hole style only: head = bore only the central island and stop inside the gaps to the arms; all = full width")
     ap.add_argument("--column", type=float, default=0.18, help="half-width of the central column as a fraction of the model width")
     ap.add_argument("--views", action="store_true")
     a = ap.parse_args()
@@ -111,16 +113,40 @@ def main() -> int:
         # No added hardware: bore a cord hole straight through the head. Strongest option by far,
         # because the load is carried by the whole skull section rather than by a thin added loop.
         z_drill = m.bounds[0][2] + a.hole_z * ext[2]
-        span = float(np.abs(m.extents).max()) * 2
-        bore = trimesh.creation.cylinder(radius=a.hole / 2, height=span, sections=64)
+        # Find the head as its own island in the slice at that height (the raised arms are separate
+        # islands either side of it), bore through the head only, and stop the bore inside the gaps
+        # between head and arms so the cord exits there instead of piercing the arms.
+        def islands(mesh):
+            s = mesh.section(plane_origin=[0, 0, z_drill], plane_normal=[0, 0, 1])
+            p2, T = s.to_2D()
+            out = []
+            for poly in p2.polygons_full:
+                pts = trimesh.transform_points(np.c_[np.array(poly.exterior.coords), np.zeros(len(poly.exterior.coords))], T)
+                out.append(dict(cx=pts[:, 0].mean(), cy=pts[:, 1].mean(), x0=pts[:, 0].min(), x1=pts[:, 0].max(),
+                                y0=pts[:, 1].min(), y1=pts[:, 1].max(), area=abs(poly.area)))
+            return out
+        isl = islands(m)
+        head = min(isl, key=lambda i: abs(i["cx"] - cx))
+        others = [i for i in isl if i is not head]
+        if a.plane == "side":
+            lo, hi = head["x0"], head["x1"]
+            gap = min([head["x0"] - i["x1"] for i in others if i["x1"] <= head["x0"]] +
+                      [i["x0"] - head["x1"] for i in others if i["x0"] >= head["x1"]] + [99.0])
+        else:
+            lo, hi = head["y0"], head["y1"]
+            gap = min([head["y0"] - i["y1"] for i in others if i["y1"] <= head["y0"]] +
+                      [i["y0"] - head["y1"] for i in others if i["y0"] >= head["y1"]] + [99.0])
+        margin = min(1.5, 0.6 * gap) if a.through == "head" else float(np.abs(ext).max())
+        length = (hi - lo) + 2 * margin
+        bore = trimesh.creation.cylinder(radius=a.hole / 2, height=length, sections=64)
         bore.apply_transform(to_axis)
-        bore.apply_translation([cx, cy, z_drill])
+        bore.apply_translation([head["cx"], head["cy"], z_drill])
         out = difference(m, bore)
         validate(out, "bored")
-        sec = out.section(plane_origin=[0, 0, z_drill], plane_normal=[0, 0, 1])
-        area = sum(abs(p.area) for p in sec.to_2D()[0].polygons_full) if sec is not None else float("nan")
-        log(f"cord hole  {a.hole:g} mm through the head at z {z_drill:.1f} mm ({a.hole_z:.0%} of height), axis {a.plane}; "
-            f"remaining section there {area:.1f} mm^2")
+        rem = min((i["area"] for i in islands(out) if abs(i["cx"] - cx) < 3.0), default=float("nan"))
+        log(f"cord hole  {a.hole:g} mm through the {a.through} at z {z_drill:.1f} mm ({a.hole_z:.0%}), axis {a.plane}; "
+            f"head island {hi - lo:.1f} mm wide, {head['area']:.0f} mm^2, gap to arms {gap:.1f} mm; "
+            f"bore {length:.1f} mm long; skull section left around the bore {rem:.1f} mm^2")
         out.export(a.out)
         e = out.extents
         log(f"wrote {a.out}  {len(out.faces):,} faces  {e[0]:.1f} x {e[1]:.1f} x {e[2]:.1f} mm  ({time.time() - t0:.1f} s)")
