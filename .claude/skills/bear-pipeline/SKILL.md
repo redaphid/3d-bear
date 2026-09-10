@@ -29,7 +29,16 @@ the PNG/GLB metadata is the re-runnable workflow) or the per-file watcher patter
   `view / pose / mass / mouth` per `foreach` item; shared text lives in `comfy.yaml vars:`.
 - **View clauses must be geometric** ("body rotated ~45°, near shoulder toward the
   camera") and early in the prompt. **Raised-arms poses snap to frontal** on
-  Z-Image; bent / tall / swipe poses turn as asked.
+  Z-Image; bent / tall / swipe poses turn as asked. Frontal references reconstruct
+  just as well (round 3z: b, k, l) — the view is not a filter.
+- **Round 3z settled the pose (17/20 under the 5 % gate, round 2z had 0/20):** put the
+  bear **on a rock plinth** (worth 1–2 points in 9 of 10 matched pairs, and it is the
+  plate contact + the base opening), **head thrown back roaring at the sky** (no muzzle
+  underside), arms **overhead or one-up-one-down** (guard/clasp shade the belly), and
+  use the **bronze prompt** (grizzly anatomy survives the remesh; fur texture does not
+  cost anything; the clay prompt gives a plush toy). Z-Image ignores "legs together".
+- **Score on the post-repair figure** (`mesh_repair.py --open-base` then `check_mesh.py`
+  on the STL): the raw census counts the slab's underside (d: 16.5 % raw, 4.4 % repaired).
 - **Z-Image Turbo with `load_clip_device: cpu`** is the sweep generator on this box
   (33 s/image, 12.7 GB). With the encoder on GPU it hangs in VAE decode. Qwen-Image
   2512 follows view clauses better but needs the whole card — use it only for
