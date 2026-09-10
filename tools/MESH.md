@@ -46,18 +46,19 @@ its guarantee does not depend on the input.
 
 `python tools/mesh_repair.py outputs/scratch/mesh_round1_d.glb --out outputs/stage3_print/round1_d/round1_d_print.stl --height 160 --open-base --views`
 
-| | before | after (voxel 0.6 mm, 12,000 faces, base cut) |
+| | before (raw at 160 mm) | after (voxel 0.6 mm, 12,000 faces, base cut) |
 |---|---|---|
-| faces | 271,556 | 11,574 |
+| faces | 271,556 | 11,602 |
 | bodies | 1 (+873 debris) | 1 |
 | watertight / winding | no / no | yes / yes |
 | Euler | 349 | 2 |
 | manifold3d | NotManifold | NoError |
-| volume | n/a (open) | 348.7 cm³ |
-| printed height | 160.0 mm | 152.0 mm (160 − 8 mm cut) |
-| footprint | 135.9 × 62.7 mm | 135.5 × 62.6 mm |
-| needs support | 8.72 % | 6.15 %, worst band z 0–25 mm |
-| base openings | – | 2 (one per foot, ≈ 25 × 30 mm) |
+| volume | n/a (open) | 404.9 cm³ |
+| bear scale | 160.0 mm | 168.0 mm |
+| printed height | 160.0 mm | 160.0 mm |
+| footprint (printed piece) | 135.9 × 62.7 mm | 142.8 × 66.3 mm |
+| needs support | 8.72 % | 6.29 %, worst band z 0–27 mm |
+| base openings | – | 2 (one per foot, ≈ 26 × 31 mm) |
 
 Runs in about 8 s. The support that remains is the crotch, the underarms and
 the underside of the muzzle; the sheet tints those faces red. The 5 % gate is
@@ -77,10 +78,11 @@ not met yet; that is a pose question, not a repair question.
   `outputs/stage3_print/round1_d/round1_d_faces_ladder.png`. Decimation is
   validated; if it breaks the solid it retries gentler and finally keeps the
   dense mesh.
-- **Open base 8 mm** (`--open-base`, `--base`). The cut comes out of
-  `--height`: the model is scaled to 160 mm, the bottom 8 mm are removed, and
-  the print is 152 mm tall with the proportions of a 160 mm bear. The table's
-  `printed height` row is the height of the STL.
+- **Open base 8 mm** (`--open-base`, `--base`). `--height` is the printed
+  height, what comes off the plate. The bear is scaled to `--height + --base`
+  (168 mm), the bottom 8 mm are removed, and the piece is exactly 160 mm tall.
+  The table shows both: `bear scale` and `printed height`, and the footprint
+  is the printed piece's. Without `--open-base` the two are the same number.
 
 ## The Y-up gotcha
 

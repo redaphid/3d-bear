@@ -34,11 +34,12 @@ Steps, in order, each one reported as it runs:
 Then a before/after table and an STL. Exit code is check_mesh's: 0 if the
 result is watertight with under 5% of its surface needing support.
 
-With --open-base the bottom --base mm come out of --height: the print is
---height minus --base tall, with the proportions of a --height bear. Without
---height, --pitch is in the file's own units and defaults to the same
-fraction of the model as 0.6 mm is of a 160 mm print. A bare --views writes
-the sheet beside the STL.
+--height is the printed height, what comes off the plate. With --open-base
+the bear is scaled to --height plus --base before the cut, so the piece is
+--height tall after it; the table shows both numbers. Without --height,
+--pitch is in the file's own units and defaults to the same fraction of the
+model as 0.6 mm is of a 160 mm print. A bare --views writes the sheet beside
+the STL.
 
     pip install trimesh manifold3d numpy scipy scikit-image fast_simplification pymeshfix
 """
@@ -293,7 +294,7 @@ def describe_openings(mesh):
 
 # ----------------------------------------------------------------- report
 
-def table(before, after, openings):
+def table(before, after, openings, base=None):
     def row(label, a, b):
         print(f"  {label:<15}{a:>22}{b:>22}")
 
@@ -317,6 +318,8 @@ def table(before, after, openings):
     row("euler", f"{before['euler']}", f"{after['euler']}")
     row("manifold3d", before["manifold"], after["manifold"])
     row("volume", vol(before), vol(after))
+    if base:
+        row("bear scale", f"{before['height']:.1f} mm", f"{after['height'] + base:.1f} mm")
     row("printed height", f"{before['height']:.1f} mm", f"{after['height']:.1f} mm")
     row("footprint", fp(before), fp(after))
     row("needs support", f"{before['unsupported_pct']:.2f}%", f"{after['unsupported_pct']:.2f}%")
@@ -356,13 +359,14 @@ def repair(path, out, faces=DEFAULT_FACES, height=None, base=None, up="auto",
     before = measure_all(mesh, limit)
     log("before", validation_line(validate(mesh)))
 
-    # the base cut comes out of --height: the print is height - base tall
-    work_height = height
+    # --height is the printed height: with a base cut the bear itself is
+    # scaled to height + base so the piece is exactly --height after the cut
+    work_height = (height + base) if (height and base) else height
     if height:
         scale_and_place(mesh, work_height)
-        log("scale", f"to {height:g} mm"
-                     + (f" (bottom {base:g} mm to be cut off; printed height "
-                        f"{height - base:g} mm)" if base else ""))
+        log("scale", f"bear to {work_height:g} mm"
+                     + (f" (printed height {height:g} mm after the {base:g} mm cut)"
+                        if base else ""))
     pitch = pitch if pitch is not None else default_pitch(mesh, height)
 
     mesh = largest_component(mesh)
@@ -389,10 +393,11 @@ def repair(path, out, faces=DEFAULT_FACES, height=None, base=None, up="auto",
             log("open base", "skipped: mesh is not a solid, manifold3d would refuse")
 
     after = measure_all(mesh, limit)
-    table(before, after, openings)
+    table(before, after, openings, base)
     if height and base:
-        print(f"\n  note: printed height is {height:g} - {base:g} = {height - base:g} mm; "
-              f"the base cut comes out of --height, not on top of it")
+        print(f"\n  note: bear scaled to {work_height:g} mm so the piece is {height:g} mm "
+              f"after the {base:g} mm cut; 'before' is the raw at {height:g} mm, "
+              f"'after' footprint is the printed piece")
 
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
