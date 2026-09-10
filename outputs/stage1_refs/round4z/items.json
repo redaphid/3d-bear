@@ -1,0 +1,102 @@
+{
+ "a": {
+  "id": "a",
+  "seed": 5001,
+  "tag": "front overhead snarl bronze"
+ },
+ "b": {
+  "id": "b",
+  "seed": 5102,
+  "tag": "front overhead roar_up bronze"
+ },
+ "c": {
+  "id": "c",
+  "seed": 5203,
+  "tag": "front oneup snarl bronze"
+ },
+ "d": {
+  "id": "d",
+  "seed": 5304,
+  "tag": "L34 oneup jaws bronze"
+ },
+ "e": {
+  "id": "e",
+  "seed": 5405,
+  "tag": "front threat snarl bronze"
+ },
+ "f": {
+  "id": "f",
+  "seed": 5506,
+  "tag": "L34 overhead roar_up bronze"
+ },
+ "g": {
+  "id": "g",
+  "seed": 5607,
+  "tag": "front oneup roar_up bronze"
+ },
+ "h": {
+  "id": "h",
+  "seed": 5708,
+  "tag": "front overhead jaws bronze"
+ },
+ "i": {
+  "id": "i",
+  "seed": 5809,
+  "tag": "L34 threat jaws bronze"
+ },
+ "j": {
+  "id": "j",
+  "seed": 5910,
+  "tag": "front oneup jaws bronze"
+ },
+ "k": {
+  "id": "k",
+  "seed": 6011,
+  "tag": "front overhead snarl museum"
+ },
+ "l": {
+  "id": "l",
+  "seed": 6112,
+  "tag": "front overhead roar_up museum"
+ },
+ "m": {
+  "id": "m",
+  "seed": 6213,
+  "tag": "front oneup snarl museum"
+ },
+ "n": {
+  "id": "n",
+  "seed": 6314,
+  "tag": "L34 oneup jaws museum"
+ },
+ "o": {
+  "id": "o",
+  "seed": 6415,
+  "tag": "front threat snarl museum"
+ },
+ "p": {
+  "id": "p",
+  "seed": 6516,
+  "tag": "L34 overhead roar_up museum"
+ },
+ "q": {
+  "id": "q",
+  "seed": 6617,
+  "tag": "front oneup roar_up museum"
+ },
+ "r": {
+  "id": "r",
+  "seed": 6718,
+  "tag": "front overhead jaws museum"
+ },
+ "s": {
+  "id": "s",
+  "seed": 6819,
+  "tag": "L34 threat jaws museum"
+ },
+ "t": {
+  "id": "t",
+  "seed": 6920,
+  "tag": "front oneup jaws museum"
+ }
+}
