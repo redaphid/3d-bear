@@ -1,6 +1,8 @@
 # print-ready — files you can drop straight into the slicer
 
-**Status 2026-09-10 12:30:** the user chose round-4 `b` — `bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl`.
+**Status 2026-09-10 14:00:** the user chose round-4 `b`, now reconstructed with **TRELLIS.2** instead of Hunyuan3D —
+it carries the carved fur Hunyuan flattened away. Print `bear-r4b-TRELLIS-grizzly-roar-on-rock-160mm.stl`.
+Evidence and the environment build are in `docs/TRELLIS2_EVAL.md`.
 
 Every STL here is a validated solid (watertight, consistent winding, Euler 2,
 manifold3d clean). Round-3 files use the recipe from `outputs/stage3_print/quality/report.md`:
@@ -11,6 +13,8 @@ away so the base is open for the light and the pole.
 
 | file | pose | footprint | needs support | notes |
 |---|---|---|---|---|
+| `bear-r4b-TRELLIS-grizzly-roar-on-rock-160mm.stl` | **round 4 bear b via TRELLIS.2 dual-contouring**: carved fur on arms and shoulders, open jaw with tongue and teeth, separate claws, rock plinth | 96 x 86 mm | **3.7 %** | **RECOMMENDED — print this one.** 46k faces so the fur survives the repair |
+| `bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl` | the same bear via Hunyuan3D 2.1 — same pose, smooth surface, no fur | 94 x 71 mm | 3.0 % | superseded by the TRELLIS version above |
 | `bear-r3l-bronze-sky-roar-on-rock-160mm.stl` | round 3, bronze: grizzly anatomy, both arms up roaring at the sky, rock plinth | 82 x 63 mm | 1.90 % | lowest support; smoothed 25k faces; red is the crotch only |
 | `bear-r3h-one-arm-up-sky-roar-on-rock-160mm.stl` | round 3: one arm up, one down, roaring at the sky, rock plinth | 92 x 63 mm | 1.89 % | clay-style face, asymmetric pose |
 | `bear-r3k-bronze-sky-roar-160mm.stl` | round 3, bronze: both arms up roaring at the sky, no plinth | 94 x 67 mm | 3.12 % | the fierce-ish one without a rock |
