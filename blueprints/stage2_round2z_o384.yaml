@@ -1,0 +1,32 @@
+# Stage 2 — octree 384 pass on the round-2z candidates that are genuine
+# three-quarter views on the contact sheet (c, d, g, i from a–j; k, o, q, s from
+# k–t; j is the only other rotated one). Same pipeline as stage2_round2z.yaml,
+# finer decode. GLBs land under 3d-bear/stage2_mesh/round2z_o384/<id>.
+# No cutout tap: the cutouts are identical to the octree-256 run.
+# Build: python tools/build.py blueprints/stage2_round2z_o384.yaml
+output_prefix: 3d-bear/stage2_mesh/round2z_o384
+chunk: 4
+foreach:
+  - {id: c, ref: $asset.round2z/c.png, prefix: 3d-bear/stage2_mesh/round2z_o384/c, seed: 1}
+  - {id: d, ref: $asset.round2z/d.png, prefix: 3d-bear/stage2_mesh/round2z_o384/d, seed: 1}
+  - {id: g, ref: $asset.round2z/g.png, prefix: 3d-bear/stage2_mesh/round2z_o384/g, seed: 1}
+  - {id: i, ref: $asset.round2z/i.png, prefix: 3d-bear/stage2_mesh/round2z_o384/i, seed: 1}
+  - {id: k, ref: $asset.round2z/k.png, prefix: 3d-bear/stage2_mesh/round2z_o384/k, seed: 1}
+  - {id: o, ref: $asset.round2z/o.png, prefix: 3d-bear/stage2_mesh/round2z_o384/o, seed: 1}
+  - {id: q, ref: $asset.round2z/q.png, prefix: 3d-bear/stage2_mesh/round2z_o384/q, seed: 1}
+  - {id: s, ref: $asset.round2z/s.png, prefix: 3d-bear/stage2_mesh/round2z_o384/s, seed: 1}
+pipeline:
+  - fragment: rembg
+    alias: cut
+    inputs:
+      image: $item.ref
+
+  - fragment: hy3d_i2m
+    alias: mesh
+    inputs:
+      clip_vision_encode_image: $cut.image
+    params:
+      save_3d_model_filename_prefix: $item.prefix
+      vaedecodehunyuan3d_octree_resolution: 384
+      ksampler_steps: 30
+      ksampler_seed: $item.seed

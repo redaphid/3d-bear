@@ -1,0 +1,58 @@
+# Stage 2 — reconstruct EVERY round-2z reference (Hunyuan3D 2.1, local).
+# One branch per Stage-1 candidate at the baseline settings (octree 256, 30
+# steps, seed 1): rembg -> cutout tap -> hy3d_i2m. `chunk: 5` compiles one job
+# per five candidates so meshes land every few minutes instead of all at once.
+#
+#   id      Stage-1 candidate id (assets/round2z/<id>.png, pushed via tools/push_assets.py)
+#   ref     the reference PNG, resolved through the push lock
+#   prefix  GLB lands at <ComfyUI output>/3d-bear/stage2_mesh/round2z/<id>_00001_.glb
+#   cutout  the rembg tap lands at <ComfyUI output>/debug/3d-bear/stage2_mesh/round2z/<id>_cutout_00001_.png
+#           (only in a --debug build; this round we WANT it — the cutout is a QC gate)
+#   seed    KSampler seed for the shape diffusion
+#
+# Build: python tools/build.py blueprints/stage2_round2z.yaml --debug
+output_prefix: 3d-bear/stage2_mesh/round2z
+chunk: 5
+foreach:
+  - {id: a, ref: $asset.round2z/a.png, prefix: 3d-bear/stage2_mesh/round2z/a, cutout: debug/3d-bear/stage2_mesh/round2z/a_cutout, seed: 1}
+  - {id: b, ref: $asset.round2z/b.png, prefix: 3d-bear/stage2_mesh/round2z/b, cutout: debug/3d-bear/stage2_mesh/round2z/b_cutout, seed: 1}
+  - {id: c, ref: $asset.round2z/c.png, prefix: 3d-bear/stage2_mesh/round2z/c, cutout: debug/3d-bear/stage2_mesh/round2z/c_cutout, seed: 1}
+  - {id: d, ref: $asset.round2z/d.png, prefix: 3d-bear/stage2_mesh/round2z/d, cutout: debug/3d-bear/stage2_mesh/round2z/d_cutout, seed: 1}
+  - {id: e, ref: $asset.round2z/e.png, prefix: 3d-bear/stage2_mesh/round2z/e, cutout: debug/3d-bear/stage2_mesh/round2z/e_cutout, seed: 1}
+  - {id: f, ref: $asset.round2z/f.png, prefix: 3d-bear/stage2_mesh/round2z/f, cutout: debug/3d-bear/stage2_mesh/round2z/f_cutout, seed: 1}
+  - {id: g, ref: $asset.round2z/g.png, prefix: 3d-bear/stage2_mesh/round2z/g, cutout: debug/3d-bear/stage2_mesh/round2z/g_cutout, seed: 1}
+  - {id: h, ref: $asset.round2z/h.png, prefix: 3d-bear/stage2_mesh/round2z/h, cutout: debug/3d-bear/stage2_mesh/round2z/h_cutout, seed: 1}
+  - {id: i, ref: $asset.round2z/i.png, prefix: 3d-bear/stage2_mesh/round2z/i, cutout: debug/3d-bear/stage2_mesh/round2z/i_cutout, seed: 1}
+  - {id: j, ref: $asset.round2z/j.png, prefix: 3d-bear/stage2_mesh/round2z/j, cutout: debug/3d-bear/stage2_mesh/round2z/j_cutout, seed: 1}
+  - {id: k, ref: $asset.round2z/k.png, prefix: 3d-bear/stage2_mesh/round2z/k, cutout: debug/3d-bear/stage2_mesh/round2z/k_cutout, seed: 1}
+  - {id: l, ref: $asset.round2z/l.png, prefix: 3d-bear/stage2_mesh/round2z/l, cutout: debug/3d-bear/stage2_mesh/round2z/l_cutout, seed: 1}
+  - {id: m, ref: $asset.round2z/m.png, prefix: 3d-bear/stage2_mesh/round2z/m, cutout: debug/3d-bear/stage2_mesh/round2z/m_cutout, seed: 1}
+  - {id: n, ref: $asset.round2z/n.png, prefix: 3d-bear/stage2_mesh/round2z/n, cutout: debug/3d-bear/stage2_mesh/round2z/n_cutout, seed: 1}
+  - {id: o, ref: $asset.round2z/o.png, prefix: 3d-bear/stage2_mesh/round2z/o, cutout: debug/3d-bear/stage2_mesh/round2z/o_cutout, seed: 1}
+  - {id: p, ref: $asset.round2z/p.png, prefix: 3d-bear/stage2_mesh/round2z/p, cutout: debug/3d-bear/stage2_mesh/round2z/p_cutout, seed: 1}
+  - {id: q, ref: $asset.round2z/q.png, prefix: 3d-bear/stage2_mesh/round2z/q, cutout: debug/3d-bear/stage2_mesh/round2z/q_cutout, seed: 1}
+  - {id: r, ref: $asset.round2z/r.png, prefix: 3d-bear/stage2_mesh/round2z/r, cutout: debug/3d-bear/stage2_mesh/round2z/r_cutout, seed: 1}
+  - {id: s, ref: $asset.round2z/s.png, prefix: 3d-bear/stage2_mesh/round2z/s, cutout: debug/3d-bear/stage2_mesh/round2z/s_cutout, seed: 1}
+  - {id: t, ref: $asset.round2z/t.png, prefix: 3d-bear/stage2_mesh/round2z/t, cutout: debug/3d-bear/stage2_mesh/round2z/t_cutout, seed: 1}
+pipeline:
+  - fragment: rembg
+    alias: cut
+    inputs:
+      image: $item.ref
+
+  - fragment: tap_image
+    alias: tap_cut
+    inputs:
+      image: $cut.image
+    params:
+      label: $item.cutout
+
+  - fragment: hy3d_i2m
+    alias: mesh
+    inputs:
+      clip_vision_encode_image: $cut.image
+    params:
+      save_3d_model_filename_prefix: $item.prefix
+      vaedecodehunyuan3d_octree_resolution: 256
+      ksampler_steps: 30
+      ksampler_seed: $item.seed

@@ -104,11 +104,43 @@ def embedded_prompt(path: Path) -> dict | None:
     return None
 
 
-def summarize_prompt(prompt: dict) -> str:
-    """One line of the settings that matter, pulled by class_type — never by node id."""
+def upstream_of(prompt: dict, node_id: str) -> dict:
+    """The sub-graph feeding node_id (inclusive): follow every [node_id, port] link."""
+    seen: dict[str, dict] = {}
+    stack = [node_id]
+    while stack:
+        nid = stack.pop()
+        node = prompt.get(nid)
+        if nid in seen or not isinstance(node, dict):
+            continue
+        seen[nid] = node
+        for v in (node.get("inputs") or {}).values():
+            if isinstance(v, list) and len(v) == 2 and isinstance(v[0], str):
+                stack.append(v[0])
+    return seen
+
+
+def branch_for_file(prompt: dict, file_stem: str | None) -> dict:
+    """In a chunked (multi-branch) prompt, only the nodes upstream of the save node
+    whose filename_prefix produced this file. Falls back to the whole prompt."""
+    if not file_stem:
+        return prompt
+    stem = re.sub(r"-\d+$", "", file_stem)  # collect's `-N` re-run suffix
+    for nid, node in prompt.items():
+        if not isinstance(node, dict) or node.get("class_type") not in ("SaveImage", "SaveGLB"):
+            continue
+        prefix = (node.get("inputs") or {}).get("filename_prefix")
+        if isinstance(prefix, str) and prefix.rsplit("/", 1)[-1] == stem:
+            return upstream_of(prompt, nid)
+    return prompt
+
+
+def summarize_prompt(prompt: dict, file_stem: str | None = None) -> str:
+    """One line of the settings that matter, pulled by class_type — never by node id.
+    With file_stem, only THIS file's branch is read (a chunked prompt holds several)."""
     bits: list[str] = []
     by_class: dict[str, list[dict]] = {}
-    for node in prompt.values():
+    for node in branch_for_file(prompt, file_stem).values():
         if isinstance(node, dict) and "class_type" in node:
             by_class.setdefault(node["class_type"], []).append(node.get("inputs") or {})
 
@@ -155,7 +187,7 @@ def describe(path: Path) -> str:
     if path.suffix.lower() in (".glb", ".gltf", ".obj", ".stl"):
         parts.append(mesh_stats(path))
     prompt = embedded_prompt(path)
-    parts.append(summarize_prompt(prompt) if prompt else "(no embedded prompt)")
+    parts.append(summarize_prompt(prompt, path.stem) if prompt else "(no embedded prompt)")
     return " · ".join(parts)
 
 
