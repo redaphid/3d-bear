@@ -47,6 +47,14 @@ the PNG/GLB metadata is the re-runnable workflow) or the per-file watcher patter
   `build.py` strips them unless `--debug`. Cutout taps stay ON for reconstruction rounds.
 - `comfy assets push` crashes on Windows after uploading — always use
   `tools/push_assets.py` (merges the leftover `.comfy/assets.lock.<pid>.tmp`).
+- **Submit with `python tools/submit.py <compiled.json…> --ids .comfy/<round>_ids.txt`**,
+  not `comfy run`: every `comfy --json run` left a python.exe behind (~90 in one
+  night). submit.py POSTs `/prompt` and strips build.py's `_meta` key, which ComfyUI
+  otherwise rejects as a node without class_type.
+- **The memory guard must log the number it computes** (`.comfy/guard.log`) and kill
+  only the process whose command line has `main.py` *and* `--port 8188`. Two silent
+  server deaths on 2026-09-10 (commit 114–116 GB, no traceback, ~2 min after a job
+  started) coincided with an agent-written guard; keep exactly one guard running.
 
 ## Watching arrivals (the user wants to see each item as it exists)
 
