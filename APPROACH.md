@@ -77,6 +77,61 @@ candidates at once instead of one.
 - Loading an API-format graph into the frontend (`app.loadApiJson`) keeps the API node ids, so live progress/previews map onto the loaded nodes — but it carries no positions, so a layout pass is required to make it readable.
 - Playwright cannot navigate away from a ComfyUI tab with an unsaved workflow until the `beforeunload` dialog is accepted.
 
+### Round 3z (2026-09-10 01:10–02:16): pose engineering works; the plinth is worth two points
+
+Twenty references (`blueprints/stage1_refs_round3z.yaml`), all twenty reconstructed at 256/30/0.6,
+all twenty repaired with `mesh_repair.py --open-base` and scored on the **post-repair** support figure
+(the raw figure is inflated by the underside of the rock slab, which the base cut removes: `d` reads
+16.5 % raw and 4.4 % repaired). Ranking, support % of surface at 160 mm:
+
+| id | pose | base | style | support |
+|---|---|---|---|---|
+| l | both arms up, head back roaring at the sky | rock | bronze | **1.76** |
+| h | one arm up, one down, roaring at the sky | rock | clay | 1.79 |
+| g | one arm up, one down, jaw closed | legs | clay | 1.94 |
+| j | totem column, roaring at the sky | rock | clay | 2.42 |
+| b | both arms up, roaring at the sky | rock | clay | 2.47 |
+| k | both arms up, roaring at the sky | legs | bronze | 3.08 |
+| a | both arms up, roaring at the sky | legs | clay | 3.49 |
+| t | totem column, chin tucked | rock | bronze | 3.76 |
+| s | totem column, jaw closed | legs | bronze | 3.82 |
+| r | one arm up, jaw closed | rock | bronze | 3.90 |
+| n | boxer's guard, jaw closed | rock | bronze | 3.91 |
+| p | paws down (asked for clasp), roaring at the sky | rock | bronze | 3.98 |
+| i | totem column, chin tucked | legs | clay | 4.03 |
+| e | paws down (asked for clasp), roaring at the sky | legs | clay | 4.07 |
+| f | paws clasped, jaw closed | rock | clay | 4.39 |
+| d | boxer's guard, jaw closed | rock | clay | 4.42 |
+| o | paws clasped, jaw closed | legs | bronze | 4.86 |
+| c | boxer's guard, jaw closed | legs | clay | 5.16 |
+| q | one arm up, chin tucked | legs | bronze | 5.18 |
+| m | boxer's guard, chin tucked | legs | bronze | 5.84 |
+
+Seventeen of twenty are under the 5 % gate; round 2z had none (best 5.2 %). What the matrix says:
+
+- **The rock plinth is worth one to two points in nine of ten matched pairs** (c 5.16 → d 4.42,
+  m 5.84 → n 3.91, k 3.08 → l 1.76, a 3.49 → b 2.47, i 4.03 → j 2.42, q 5.18 → r 3.90, o 4.86 → p 3.98,
+  g 1.94 → h 1.79, s 3.82 → t 3.76; only e → f went the other way, and those differ in head too). It
+  is also the plate contact, and after the base cut its bottom is the single opening for the pole and
+  light. Z-Image rendered every "rock" item on a slab and ignored "hind legs pressed together" in every
+  "legs" item, so the crotch band (z 27–53 mm) is the residual red on all twenty.
+- **Head up beats head down.** Every sky-roar variant beats its closed-jaw or chin-tucked twin; the
+  three bears over the gate are all chin-tucked or closed-jaw guards without a rock. Throwing the head
+  back removes the muzzle underside entirely.
+- **Arms: overhead or one-up-one-down are best; guard and clasp are worst.** Vertical forearms still
+  shade the belly and armpits when the elbows sit on the ribs.
+- **The bronze prompt reconstructs as a grizzly.** k/l/p/r keep the long muzzle, the shoulder hump and
+  the limb masses; the fur texture in the reference does not survive the voxel remesh and 12k-face
+  decimation, so it costs nothing. The clay prompt reconstructs as a plush toy every time.
+- **Frontal references reconstruct as well as three-quarter ones** (b, l and k are frontal). The
+  three-quarter rule from HANDOFF was never tested and is dropped as a filter.
+- **Hunyuan kept the asymmetric one-arm-up pose** (g, h, q, r) this round; the symmetrising seen on
+  round-2 `k` was not repeated.
+
+Shipped to `print-ready/`: `bear-r3l-bronze-sky-roar-on-rock-160mm.stl` (**recommended**), plus r3h,
+r3k, r3b and r3d. Infrastructure findings from the same night (commit-limit deaths, Ollama's supervisor
+loop and 20-second warm client) are in the `comfy-local-ops` skill and `docs/OLLAMA_ON_SOUL.md`.
+
 ## 4. Division of labour (this session)
 
 | Agent | Owns | Delivers |
@@ -113,25 +168,21 @@ outputs/
 - Is `fill_holes` enough to make 2.1 output watertight, or is a manifold rebuild needed? (`mesh_repair.py` pending)
 - Multi-view Hunyuan3D (`hunyuan3d-dit-v2-mv`) is not on disk; only fetch it if the backs are bad.
 
-## 7. State at handoff (2026-09-10, ~01:00)
+## 7. State at handoff (2026-09-10, ~02:20)
 
-**Done.** 20 references (round 2z), all 20 reconstructed, parameter sweep and no-cutout control measured,
-repair chain validated, six print-ready STLs in `print-ready/` (recommended: `c`, 5.2 % support). Outputs
-committed as samples. Skills: `.claude/skills/bear-pipeline` (project), `comfy-local-ops` and
-`mesh-print-prep` (user-level). Showcase at `docs/index.html`.
-
-**Running / queued at handoff.** Octree-384 pass on the eight three-quarter candidates (`c d g i k o q s`),
-then `o512` — knowledge only; nothing waits on them. Results land under `outputs/stage2_mesh/round2z_o384/`
-and `outputs/stage2_params/d/`.
+**Done.** Three reference rounds (60 candidates), 46 reconstructions, the Hunyuan parameter sweep (null at
+print scale), the repair chain, and round 3z's pose-engineered matrix that put 17 of 20 bears under the
+5 % support gate. **Print `print-ready/bear-r3l-bronze-sky-roar-on-rock-160mm.stl`** (1.8 % support,
+82 × 64 mm, 160 mm tall, opening in the plinth). Showcase at `docs/index.html`.
 
 **Next steps, in order.**
-1. **Print `bear-c-one-paw-raised-160mm.stl`** (or the 100 mm `o` first to settle wall thickness / glow —
-   `ladder.stl` is the coupon). Settings in `print-ready/README.md`. Diagnose before reprinting if the
-   Centauri faults again.
-2. If the pose needs changing after seeing it in the dark: re-render the chosen pose on **Qwen-Image 2512**
-   with the geometric view clause and an asymmetric pose (raised arms snap to frontal), Ollama down,
-   then reconstruct (256/30) and repair. One candidate is about 4 min end-to-end.
-3. Stage 4 is unchanged from HANDOFF: 2 walls, 0 % infill, 0 bottom layers, tree supports only under the
-   red areas, brim.
-4. Optional knowledge: TRELLIS 2 once ComfyUI is updated (its DC remesh replaces `mesh_repair.py`'s job
-   in-graph); multi-view Hunyuan is NOT needed — backs reconstruct fine from a single view.
+1. Print `r3l`. Slicer settings in `print-ready/README.md`. Test the wall/glow question on a 100 mm copy
+   first if unsure (`mesh_repair.py --height 100`).
+2. Crotch: the only red left on every bear. `mesh_repair.py --fill-legs` (in progress in
+   `outputs/stage3_print/quality/report.md`) or a reference prompt that actually closes the legs.
+3. Surface quality: the pitch / faces / smoothing grid in the same report decides whether to move off
+   0.6 mm / 12k faces.
+4. Round 4, if wanted: bronze prompt only, sky-roar or one-arm-up only, rock only, 20 seeds — everything
+   else in the matrix is settled.
+5. Machine: kill the Ollama supervisor loop before any long GPU job (`docs/OLLAMA_ON_SOUL.md`); consider
+   `wsl --shutdown` for 55 GB of commit headroom.

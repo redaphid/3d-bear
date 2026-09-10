@@ -2,7 +2,7 @@
 
 **Status (2026-09-10 01:00):** pipeline built and run end-to-end — 20 references,
 20 reconstructions, validated print-ready STLs in `print-ready/` (print
-`bear-c-one-paw-raised-160mm.stl`). `APPROACH.md` §7 has the state and next steps;
+`bear-r3l-bronze-sky-roar-on-rock-160mm.stl`, 1.8 % support after round 3z). `APPROACH.md` §7 has the state and next steps;
 `PIPELINE.md` how to build/run/debug. TRELLIS 2 is still absent from this ComfyUI
 (0.31.0); Stage 2 runs Hunyuan3D 2.1 and that turned out to be enough.
 **Written:** 2026-09-10. **Goldrush:** 2026-09-12.
