@@ -188,3 +188,11 @@ item to `blueprints/stage2_mesh.yaml`, build, run. Vary `octree` (256 → 384 �
   scale). rembg is mandatory (the control reconstructed the backdrop as a wall).
 - The full machine runbook (launch line with `--preview-method auto`, safe kill, memory guard, Ollama) is the
   user-level Claude skill `comfy-local-ops`; the project runbook is `.claude/skills/bear-pipeline`.
+
+## Stage 5 — keychain (CPU, seconds)
+
+`python tools/keychain.py print-ready/<bear>.stl --out print-ready/keychain-<bear>-32mm.stl --scale 0.2 --views`
+scales a validated Stage-3 solid, finds the top of the head as the highest point in the central column
+(so raised paws are ignored), fuses a torus loop there (`--hole 4.5 --tube 2.2` mm printed, `--plane
+front|side`, sunk `--sink 1.2` mm into the head) with a manifold3d union, and re-validates. The base
+stays closed: at this scale the piece prints solid and there is no pole or light.
