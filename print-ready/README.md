@@ -7,8 +7,9 @@ away so the base is open for the light and the pole.
 
 | file | pose | footprint | needs support | notes |
 |---|---|---|---|---|
+| `bear-r3l-bronze-sky-roar-on-rock-160mm.stl` | **round 3, bronze style, on a rock**: grizzly anatomy, both arms up roaring at the sky, rock plinth | 82 x 64 mm | **1.8 %** | **RECOMMENDED — print this one.** Lowest support of all 46 bears, real grizzly, plinth is the plate contact and the base opening; red is the crotch only |
 | `bear-r3k-bronze-sky-roar-160mm.stl` | **round 3, bronze style**: real grizzly anatomy (long muzzle, hump), both arms up roaring at the sky, no plinth | 95 x 68 mm | **3.1 %** | **the fierce one** — first bear that looks like a grizzly rather than a toy; red is crotch, armpits, under the muzzle |
-| `bear-r3h-one-arm-up-sky-roar-on-rock-160mm.stl` | **round 3**: one arm straight up, the other down the flank, head back roaring at the sky, on a rock plinth | 93 x 64 mm | **1.8 %** | **recommended** — lowest support of everything; only the crotch is red |
+| `bear-r3h-one-arm-up-sky-roar-on-rock-160mm.stl` | **round 3**: one arm straight up, the other down the flank, head back roaring at the sky, on a rock plinth | 93 x 64 mm | **1.8 %** | clay-style alternative — same support, friendlier face |
 | `bear-r3b-sky-roar-on-rock-160mm.stl` | **round 3**: both arms up, head thrown back roaring at the sky, standing on a rock plinth | 86 x 71 mm | **2.5 %** | symmetric alternative — the plinth is the plate contact and the one base opening; red is only the crotch and fingertips |
 | `bear-r3d-boxer-guard-on-rock-160mm.stl` | round 3: elbows tucked, forearms vertical, jaw closed, on a rock plinth | 96 x 85 mm | 4.4 % | calmest of the under-gate bears |
 | `bear-c-one-paw-raised-160mm.stl` | one paw raised, other arm down, mouth open | 90 x 84 mm | **5.2 %** | **recommended** — most sculptural and least support |
