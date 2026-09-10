@@ -3,7 +3,11 @@
 # Why: on this box a long Z-Image queue climbs the 160 GB system commit limit within one
 # process (host staging grows per image); a fresh process between chunks costs ~20 s and
 # avoids the silent death. See the comfy-local-ops skill.
-param([switch]$NoKill)
+#   -Extra '--fast-disk','--disable-pinned-memory','--cache-none'   (appended to the ComfyUI args;
+#   these keep model staging file-backed so it stops counting against the 160 GB commit limit)
+param([switch]$NoKill, [string[]]$Extra = @())
+# -File mode flattens arrays into one comma-joined string; split it back.
+$Extra = @($Extra | ForEach-Object { $_ -split ',' } | Where-Object { $_ -ne '' })
 $ErrorActionPreference = 'Continue'
 if (-not $NoKill) {
   Get-CimInstance Win32_Process | Where-Object { $_.Name -eq 'python.exe' -and $_.CommandLine -like '*main.py*' -and $_.CommandLine -like '*--port 8188*' } |
@@ -13,7 +17,8 @@ if (-not $NoKill) {
 $a = @('--workspace','D:\tools\comfy\workspaces\default','launch','--','--port','8188',
   '--output-directory','D:\sync\Comfy','--input-directory','D:\sync\Comfy\input',
   '--models-directory','D:\comfyshared\ComfyModels','--fast','fp16_accumulation',
-  '--use-sage-attention','--listen=0.0.0.0','--verbose','INFO','--log-stdout','--preview-method','auto')
+  '--use-sage-attention','--listen=0.0.0.0','--verbose','INFO','--log-stdout','--preview-method','auto') + $Extra
+"args: $($a -join ' ')"
 $p = Start-Process 'C:\Users\hypnodroid\.local\bin\comfy.exe' -ArgumentList $a -WorkingDirectory 'D:\tools\comfy' -WindowStyle Minimized -PassThru
 "launcher pid $($p.Id) at $(Get-Date -Format HH:mm:ss)"
 for ($i = 0; $i -lt 40; $i++) {
