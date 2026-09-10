@@ -1,0 +1,20 @@
+{
+  "_fragment": {
+    "name": "tap_mesh",
+    "version": "1",
+    "description": "Debug tap: saves an intermediate MESH as GLB under output/debug/<label>. Not part of the deliverable graph. `tools/build.py` strips every tap (any SaveImage/SaveGLB whose filename_prefix starts with `debug/`) unless built with --debug; the browser view renders taps bypassed by default.",
+    "terminal": true,
+    "inputs": {
+      "mesh": { "type": "MESH", "binds": "1.mesh" }
+    },
+    "outputs": {},
+    "params": {
+      "label": { "type": "STRING", "binds": "1.filename_prefix", "default": "debug/mesh" }
+    }
+  },
+  "1": {
+    "inputs": { "mesh": "PLACEHOLDER", "filename_prefix": "debug/mesh" },
+    "class_type": "SaveGLB",
+    "_meta": { "title": "tap: mesh" }
+  }
+}

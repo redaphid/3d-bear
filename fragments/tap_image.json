@@ -1,0 +1,20 @@
+{
+  "_fragment": {
+    "name": "tap_image",
+    "version": "1",
+    "description": "Debug tap: saves an intermediate IMAGE under output/debug/<label>. Not part of the deliverable graph. `tools/build.py` strips every tap (any SaveImage/SaveGLB whose filename_prefix starts with `debug/`) unless built with --debug; the browser view renders taps bypassed by default. Place one after any step whose output you want to eyeball.",
+    "terminal": true,
+    "inputs": {
+      "image": { "type": "IMAGE", "binds": "1.images" }
+    },
+    "outputs": {},
+    "params": {
+      "label": { "type": "STRING", "binds": "1.filename_prefix", "default": "debug/tap" }
+    }
+  },
+  "1": {
+    "inputs": { "images": "PLACEHOLDER", "filename_prefix": "debug/tap" },
+    "class_type": "SaveImage",
+    "_meta": { "title": "tap: image" }
+  }
+}
