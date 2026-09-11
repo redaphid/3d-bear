@@ -13,7 +13,7 @@ away so the base is open for the light and the pole.
 
 | file | pose | footprint | needs support | notes |
 |---|---|---|---|---|
-| `keychain-bear-r4b-TRELLIS-32mm-corded.stl` | **keychain, for a 1 mm stretch cord**: the bear at 20 % (32 mm) with a 3 mm tunnel bored side-to-side through the **skull only** (86 % height), exiting into the 2 mm gaps between head and raised arms — no added loop, nothing through the arms | 19 x 17 mm | 4.4 % | **RECOMMENDED.** 2.4 mm of skull above the tunnel; thread with a needle through the gap. Hole prints ~0.5 mm undersized |
+| `keychain-bear-r4b-TRELLIS-32mm-corded.stl` | **keychain, for a 1 mm stretch cord**: the bear at 20 % (32 mm) with a 2 mm tunnel bored side-to-side through the **skull only** (86 % height), exiting into the 2 mm gaps between head and raised arms — no added loop, nothing through the arms | 19 x 17 mm | 4.4 % | **RECOMMENDED.** 2.9 mm of skull above the tunnel; thread with a needle through the gap. Hole prints ~0.5 mm undersized, so ~1.5 mm for a 1 mm cord; use --hole 2.5 if it binds |
 | `keychain-bear-r4b-TRELLIS-32mm-side.stl` | ring version, 4.5 mm hole sized for a key ring rather than a cord | 19 x 17 mm | n/a | print SOLID, no supports. Ring section 14 mm2, about twice the 2.2 mm version |
 | `keychain-bear-r4b-TRELLIS-32mm-front.stl` | same, hole facing front (hangs as a pendant) | 19 x 17 mm | n/a | same ring |
 | `totem-bear-r4b-TRELLIS-240mm-hollow-2.5mm.stl` | the same totem at **240 mm** (fills the Centauri's 256 mm cube with margin), 2.5 mm wall, base opening 134 x 129 mm | 143 x 129 mm | 8.8 % incl. cavity ceilings | the large option: ~215 cm3, about 267 g; same slicing notes |
