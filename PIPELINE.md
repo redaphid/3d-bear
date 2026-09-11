@@ -196,3 +196,14 @@ scales a validated Stage-3 solid, finds the top of the head as the highest point
 (so raised paws are ignored), fuses a torus loop there (`--hole 4.5 --tube 2.2` mm printed, `--plane
 front|side`, sunk `--sink 1.2` mm into the head) with a manifold3d union, and re-validates. The base
 stays closed: at this scale the piece prints solid and there is no pole or light.
+
+## Stage 4 prep — hollowing (CPU, ~90 s at 160 mm)
+
+`python tools/hollow.py print-ready/<bear>.stl --out print-ready/totem-<bear>-hollow-2mm.stl --wall 2.0 --pitch 0.4 --height 160 --views`
+voxelises the validated solid, keeps only the voxels within `--wall` of the surface (Euclidean distance
+transform), re-extracts the two skins, decimates each skin on its own, then cuts the bottom `--wall` mm
+with manifold3d so the cavity opens through the plinth. Isolated pockets inside thick regions are filled
+back in; thin features (ears, claws) stay solid on their own. Reports the wall as built, the base opening,
+and the material volume as a filament estimate. Rules learned: never run a per-body winding fix on the
+shell (it turns the cavity into a second solid), never simplify the assembled shell with a tolerance near
+the wall (the skins cross), and call manifold3d directly for the cut (trimesh's wrapper re-orients skins).
