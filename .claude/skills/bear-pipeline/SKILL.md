@@ -47,6 +47,19 @@ the PNG/GLB metadata is the re-runnable workflow) or the per-file watcher patter
   round-4 `b` (front, arms overhead, roar raised 30 deg, bronze) at 3.0 %.
 - **Leaky Hunyuan shell** (repair log: "closing radius 5 did not seal", footprint in metres):
   re-run `mesh_repair.py` with `--pitch 0.6`.
+- **Stage 2 for the final bear is TRELLIS.2 (port 8190, isolated env), Hunyuan3D for sweeps.** Hunyuan's
+  raw output is genuinely smooth (2.6 deg between 0.5 mm faces) — the fur was never there. TRELLIS DCx keeps
+  fur, teeth, claws; 8 min/mesh. `docs/TRELLIS2_EVAL.md`, `docs/MACHINE.md`.
+- **Detail at print size comes from pitch and face budget:** 240 mm needs `--pitch 0.3 --faces 250000
+  --smooth 3`; `hollow.py --outer keep` so the shell step never resamples the outer surface. The 0.6 mm
+  nozzle / 0.2 mm layers cannot show relief under ~0.5 mm — after that it is a hardware decision.
+- **Hollow = modelled shell (`tools/hollow.py`), sliced as a solid**; cavity ceilings are the overhangs to
+  decide on. Never per-body winding fixes, never trimesh's boolean wrapper, never a global simplify near the
+  wall thickness, never trimesh's subdivision voxeliser on a decimated mesh (see the tool's docstring).
+- **Keychain for a cord = a bored tunnel, not a loop** (`--style hole --through head --hole-z 0.86`): a ring
+  is weakest at its own equator and sinking it changes nothing; the bail looked like hardware. The user said
+  no loop, no wall between the legs, hole through the head not the arm.
+- **Read `docs/MACHINE.md` before any long GPU job** (three ComfyUI installs, commit limit, Ollama loop).
 - **Score on the post-repair figure** (`mesh_repair.py --open-base` then `check_mesh.py`
   on the STL): the raw census counts the slab's underside (d: 16.5 % raw, 4.4 % repaired).
 - **Z-Image Turbo with `load_clip_device: cpu`** is the sweep generator on this box

@@ -160,6 +160,68 @@ p 5.4 · o 5.6 · l 5.6 · c 5.8. Thirteen of twenty under the gate with the fac
 - **A leaky Hunyuan shell** (round-4 `a`: flood fill escaped, footprint reported in metres) is fixed by
   a coarser pitch; the signature is documented in the `mesh-print-prep` skill.
 
+### Stage 2 switched to TRELLIS.2 (2026-09-10 13:00–14:00): the detail was never in Hunyuan's output
+
+The user's next verdict on the round-4 bear was "overly smooth". Measured before guessing: the *raw*
+Hunyuan3D mesh (301k faces, 0.5 mm edges) bends only 2.6° between neighbouring faces — a genuinely smooth
+surface, not a detailed one being sanded down by our repair. The carved fur in the reference never made
+it into the reconstruction; octree/steps only add triangles to the same smooth blob.
+
+TRELLIS.2 (`microsoft/TRELLIS.2-4B`, ComfyUI-Trellis2 wrapper) was installed in an **isolated** ComfyUI on
+port 8190 because its CUDA wheels need torch 2.10 and the pipeline server runs 2.13 (`docs/TRELLIS2_EVAL.md`,
+`docs/MACHINE.md`). Same cutout, same bear:
+
+| mesh | faces | dihedral mean / p90 | after repair, 25k faces | support |
+|---|---:|---|---|---:|
+| Hunyuan3D 2.1 | 301k | 2.59 / 5.55 | 6.58 / 12.78 | 3.03 % |
+| TRELLIS.2 HQ (1536 cascade, quad) | 995k | 5.22 / 13.13 | 11.56 / 23.04 | 3.87 % |
+| **TRELLIS.2 DCx** (1024 cascade, dual contouring) | 503k | 5.10 / 12.45 | 8.65 / 17.34 | **3.63 %** |
+
+The close-ups (`outputs/stage2_mesh/round4z_trellis/b_closeup_print_3way.png`) settle it: both TRELLIS
+meshes have an open jaw with tongue and teeth, eyes, a brow, fur ridges and separate claws; Hunyuan has no
+face. **DCx is the Stage 2 default** — finer, more naturalistic fur, less support, 8 min instead of 12.
+Caveats: the dihedral metric is scale-dependent (smaller faces → smaller angles) so it must not be compared
+across face counts; and TRELLIS costs 8–12 min per bear against Hunyuan's 66 s, so Hunyuan stays the sweep
+tool and TRELLIS the finalist tool.
+
+### Detail at print size (14:30): pitch and face budget, not the model
+
+The first 240 mm totem was a faceted blob although it came from the TRELLIS mesh: built at 0.5 mm pitch with
+60k faces over a surface 2.25× the 160's area and ten Taubin passes. Rebuilt with `mesh_repair.py --pitch 0.3
+--faces 250000 --smooth 3` (3.4 M marching-cubes faces → 250k, 102 s) the eyes, nose, teeth, fur ridges and
+claws are all there (`print-ready/preview-totem-r4b-TRELLIS-240mm-closeup.png`). Rules: detail scales with
+pitch and the face budget, smoothing beyond ~3 passes eats fur, and the hollowing step must never resample
+the outer surface (`hollow.py --outer keep`). The printer is the remaining ceiling: 0.6 mm nozzle × 0.2 mm
+layers cannot render relief under ~0.5 mm, so a 0.4 mm nozzle or thinner layers is the next lever, not the
+mesh. A maximum-resolution TRELLIS source (sparse 64–128, 1536 cascade) is the last mesh-side lever and was
+being generated at the time of writing.
+
+### Hollowing for the light (Stage 4 prep, `tools/hollow.py`)
+
+The totem is a modelled shell, not a slicer trick: a Euclidean distance transform on the voxelised solid
+keeps only material within the wall of the surface, so the wall is uniform (measured 1.95 mm mean, 1.80–2.10
+for a nominal 2.0) and the UV light inside charges the phosphor evenly; ears and claws stay solid on their
+own. The cavity opens through the plinth (89 × 87 mm at 160, 133 × 129 at 240). Material: 78 cm³ ≈ 97 g at
+160 mm, 194 cm³ ≈ 240 g at 240 mm — against 409 / 1353 cm³ solid. Slicing changes: slice it as an ordinary
+solid (3 walls, any infill); the cavity ceilings are real overhangs — let tree supports grow up inside
+through the base opening or accept sag where nobody looks. Lessons that cost an hour each: a per-body
+winding fix turns the cavity into a second solid; trimesh's boolean wrapper re-orients skins (call
+manifold3d directly); a global simplify with a tolerance near the wall pushes the skins through each other
+(decimate each skin on its own, cavity skin right-side-out); trimesh's subdivision voxeliser wants 13 GB on a
+decimated mesh (rasterise with a barycentric lattice instead).
+
+### Keychain (Stage 5, `tools/keychain.py`): the strongest loop is no loop
+
+At 20 % (32 mm) the user first asked for a ring on the head, then judged it likely to snap. Measured at the
+thinnest horizontal section: a 2.2 mm ring carries 7.5 mm² across two legs, a 3.0 mm ring 14.0 mm², a slab
+bail with a drilled hole 24 mm² — and **sinking the ring deeper does nothing** (the weak line is the ring's
+own equator, which stays in air because the hole must stay clear). The bail looked like hardware bolted to
+the bear and was rejected. The actual requirement turned out to be a 1 mm stretch cord, so the answer is a
+3 mm tunnel bored through the skull only (`--style hole --through head`), exiting into the 2 mm gaps between
+the head and the raised arms, at 86 % of the height where 2.4 mm of crown remains above the bore: ~55 mm² of
+material around it, nothing protrudes, invisible from the front. First attempt bored the arms (the bore was
+centred on the paw tips and ran full width) — the fix finds the skull as its own slice island.
+
 ## 4. Division of labour (this session)
 
 | Agent | Owns | Delivers |
@@ -196,19 +258,24 @@ outputs/
 - Is `fill_holes` enough to make 2.1 output watertight, or is a manifold rebuild needed? (`mesh_repair.py` pending)
 - Multi-view Hunyuan3D (`hunyuan3d-dit-v2-mv`) is not on disk; only fetch it if the backs are bad.
 
-## 7. State at handoff (2026-09-10, ~12:30)
+## 7. State at handoff (2026-09-10, ~15:00)
 
-**Done.** Four reference rounds (80 candidates), 66 reconstructions, the Hunyuan parameter sweep, the
-repair chain and its measured quality recipe, and two pose/identity rounds. **The user chose round-4
-`b`: `print-ready/bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl`** (bronze grizzly roaring with
-both arms up on a rock plinth; watertight; 3.0 % support; 94 × 71 mm; 160 mm tall; opening in the
-plinth). Showcase at `docs/index.html` (rounds 3–4 not yet on it).
+**Done.** Four reference rounds, 66 Hunyuan reconstructions, TRELLIS.2 installed in an isolated
+environment and adopted for finalists, the repair chain with its measured recipe, a hollowing stage, a
+keychain stage, and the user's chosen bear (round-4 `b`) delivered in every form:
+
+| file (in `print-ready/`) | what |
+|---|---|
+| `totem-bear-r4b-TRELLIS-240mm-hollow-2.5mm.stl` | **the Goldrush totem**, 240 mm, high-detail, 2.5 mm wall, ~240 g |
+| `totem-bear-r4b-TRELLIS-160mm-hollow-2mm.stl` | the same at 160 mm, 2 mm wall, ~97 g |
+| `keychain-bear-r4b-TRELLIS-32mm-corded.stl` | 32 mm, 3 mm cord tunnel through the skull |
+| `bear-r4b-TRELLIS-grizzly-roar-on-rock-160mm.stl` | the validated solid everything above was cut from |
 
 **Next steps, in order.**
-1. Print `r4b`. Slicer settings in `print-ready/README.md`; a 100 mm coupon first if the wall/glow is
-   still an open question (`mesh_repair.py --height 100`).
-2. If the face needs more bite at print scale, a Qwen-Image 2512 re-render of `b`'s prompt (better
-   adherence than Z-Image; needs Ollama truly down and the box at < 115 GB commit) and a 384-octree
-   reconstruction are the two knobs left; everything else is measured as null.
-3. Add rounds 3–4 to the showcase (a "what fierce cost" spread: r3l 1.8 % vs r4b 3.0 %).
-4. Machine: kill the Ollama supervisor loop before any long GPU job (`docs/OLLAMA_ON_SOUL.md`).
+1. Print the totem (settings in `print-ready/README.md`; slice as a solid; decide on internal supports).
+2. If the maximum-resolution TRELLIS source lands and is visibly better, rebuild the 240 from it:
+   `mesh_repair.py --height 240 --pitch 0.3 --faces 250000 --smooth 3` then `hollow.py --wall 2.5 --outer keep`.
+3. Nozzle/layer choice is now the detail ceiling (0.4 mm nozzle or 0.12 mm layers), a hardware call.
+4. Showcase (`docs/index.html`) still stops at round 2; rounds 3–4, TRELLIS and the totem deserve a spread.
+   It is published privately as an artifact; GitHub Pages needs one toggle by the owner (`main` / `/docs`).
+5. Machine hygiene before any long GPU job: `docs/MACHINE.md` (Ollama supervisor loop, commit limit).

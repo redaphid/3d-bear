@@ -1,10 +1,10 @@
 # HANDOFF — generating the Goldrush grizzly with ComfyUI
 
-**Status (2026-09-10 01:00):** pipeline built and run end-to-end — 20 references,
-20 reconstructions, validated print-ready STLs in `print-ready/` (print
-`bear-r4b-grizzly-roar-arms-up-on-rock-160mm.stl`, chosen by the user after round 4z, 3.0 % support). `APPROACH.md` §7 has the state and next steps;
-`PIPELINE.md` how to build/run/debug. TRELLIS 2 is still absent from this ComfyUI
-(0.31.0); Stage 2 runs Hunyuan3D 2.1 and that turned out to be enough.
+**Status (2026-09-10 15:00):** delivered. Stage 2 uses TRELLIS.2 for the final bear (Hunyuan3D 2.1 for
+sweeps); Stage 3 has a measured recipe; a hollowing stage makes the shell for the light; the totem is
+`print-ready/totem-bear-r4b-TRELLIS-240mm-hollow-2.5mm.stl`. `APPROACH.md` §7 has the state and next
+steps; `docs/MACHINE.md` what to know about the box before any long GPU job.
+
 **Written:** 2026-09-10. **Goldrush:** 2026-09-12.
 **Owner:** Aaron (@redaphid)
 

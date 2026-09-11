@@ -192,10 +192,12 @@ item to `blueprints/stage2_mesh.yaml`, build, run. Vary `octree` (256 → 384 �
 ## Stage 5 — keychain (CPU, seconds)
 
 `python tools/keychain.py print-ready/<bear>.stl --out print-ready/keychain-<bear>-32mm.stl --scale 0.2 --views`
-scales a validated Stage-3 solid, finds the top of the head as the highest point in the central column
-(so raised paws are ignored), fuses a torus loop there (`--hole 4.5 --tube 2.2` mm printed, `--plane
-front|side`, sunk `--sink 1.2` mm into the head) with a manifold3d union, and re-validates. The base
-stays closed: at this scale the piece prints solid and there is no pole or light.
+scales a validated Stage-3 solid and gives it something to hang from. `--style hole --through head` (the one
+the user chose for a 1 mm stretch cord) bores a `--hole 3.0` mm tunnel through the skull only, found as its own
+island in the slice at `--hole-z 0.86` of the height, stopping inside the gaps to the raised arms; `--style
+torus` fuses a ring (`--hole --tube --plane front|side --sink`), `--style bail` a slab with a drilled hole.
+Strength is the thinnest horizontal section: ring 2.2 mm 7.5 mm², ring 3.0 mm 14 mm², bail 24 mm², skull bore
+~55 mm². Sinking a ring deeper does not help. The base stays closed: the piece prints solid.
 
 ## Stage 4 prep — hollowing (CPU, ~90 s at 160 mm)
 
@@ -211,3 +213,14 @@ and the material volume as a filament estimate. Rules learned: for a large print
 bear went from a faceted blob at 0.5/60k/taubin 10 to eyes, teeth and fur ridges); never run a per-body winding fix on the
 shell (it turns the cavity into a second solid), never simplify the assembled shell with a tolerance near
 the wall (the skins cross), and call manifold3d directly for the cut (trimesh's wrapper re-orients skins).
+
+## Stage 2 with TRELLIS.2 (finalists)
+
+Hunyuan3D 2.1 on port 8188 stays the sweep reconstructor (66 s/mesh). For the bear that will actually be
+printed, reconstruct it again with TRELLIS.2 on the isolated server (port 8190, `D:\tools\comfy\workspaces\trellis\start.ps1`):
+load `custom_nodes\ComfyUI-Trellis2\example_workflows\Gen Mesh Only with Trellis2 DCx.json`, feed the rembg
+cutout (`outputs/stage2_mesh/<round>/<id>_cutout.png`), keep the DCx extractor (dual contouring, 1024) and
+export the GLB to `outputs/stage2_mesh/<round>_trellis/<id>_dcx.glb`. About 8 minutes; 500k faces; carved fur,
+teeth and claws survive where Hunyuan gives a smooth blob (`docs/TRELLIS2_EVAL.md`). Then Stage 3 as usual —
+for a large print `--pitch 0.3 --faces 250000 --smooth 3`. Free 8188's VRAM first (`POST /free`) and never
+run both servers at once.
