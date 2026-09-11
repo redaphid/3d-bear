@@ -166,6 +166,17 @@ item to `blueprints/stage2_mesh.yaml`, build, run. Vary `octree` (256 → 384 �
 4. `python tools/build.py blueprints/stage<N>_<x>.yaml`, publish it to the
    browser view, run it.
 
+## Stage 2 with TRELLIS.2 (finalists)
+
+Hunyuan3D 2.1 on port 8188 stays the sweep reconstructor (66 s/mesh). For the bear that will actually be
+printed, reconstruct it again with TRELLIS.2 on the isolated server (port 8190, `D:\tools\comfy\workspaces\trellis\start.ps1`):
+load `custom_nodes\ComfyUI-Trellis2\example_workflows\Gen Mesh Only with Trellis2 DCx.json`, feed the rembg
+cutout (`outputs/stage2_mesh/<round>/<id>_cutout.png`), keep the DCx extractor (dual contouring, 1024) and
+export the GLB to `outputs/stage2_mesh/<round>_trellis/<id>_dcx.glb`. About 8 minutes; 500k faces; carved fur,
+teeth and claws survive where Hunyuan gives a smooth blob (`docs/TRELLIS2_EVAL.md`). Then Stage 3 as usual —
+for a large print `--pitch 0.3 --faces 250000 --smooth 3`. Free 8188's VRAM first (`POST /free`) and never
+run both servers at once.
+
 ## Stage 3 and shipping (added after the first night)
 
 - `tools/collect.py <server_subdir> <project_dir>` mirrors server outputs byte-for-byte and writes an `index.md`
@@ -178,16 +189,6 @@ item to `blueprints/stage2_mesh.yaml`, build, run. Vary `octree` (256 → 384 �
 - `tools/mesh_views.py` (six views, red = needs support), `tools/mesh_batch.py` / `mesh_index.py` (per-directory
   reports). Rationale and defaults: `tools/MESH.md`.
 - Ship to `print-ready/bear-<id>-<pose>-160mm.stl` with `preview-bear-<id>.png` and a row in `print-ready/README.md`.
-
-## Operating notes (this box)
-
-- Z-Image sweeps: `load_clip_device: cpu` (default in `stage1_refs_z.yaml`) — with the encoder on the GPU a
-  branch can hang in VAE decode. Qwen-Image 2512 only with Ollama shut down.
-- Model families never share the card: finish Z-Image chunks, `POST /free {"unload_models":true}`, then Hunyuan.
-- Hunyuan3D settings are settled at octree 256 / 30 steps / threshold 0.6 (the sweep showed no difference at print
-  scale). rembg is mandatory (the control reconstructed the backdrop as a wall).
-- The full machine runbook (launch line with `--preview-method auto`, safe kill, memory guard, Ollama) is the
-  user-level Claude skill `comfy-local-ops`; the project runbook is `.claude/skills/bear-pipeline`.
 
 ## Stage 4 prep — hollowing (CPU, ~90 s at 160 mm)
 
@@ -234,14 +235,12 @@ a cavity into a second solid). The riser outline is inset 0.1 mm so its wall is 
 bear's, which otherwise leaves sliver triangles that manifold3d tolerates but slicers and trimesh reject —
 check the exported STL, not just the in-memory mesh. The base stays closed: the charm prints solid.
 
+## Operating notes (this box)
 
-## Stage 2 with TRELLIS.2 (finalists)
-
-Hunyuan3D 2.1 on port 8188 stays the sweep reconstructor (66 s/mesh). For the bear that will actually be
-printed, reconstruct it again with TRELLIS.2 on the isolated server (port 8190, `D:\tools\comfy\workspaces\trellis\start.ps1`):
-load `custom_nodes\ComfyUI-Trellis2\example_workflows\Gen Mesh Only with Trellis2 DCx.json`, feed the rembg
-cutout (`outputs/stage2_mesh/<round>/<id>_cutout.png`), keep the DCx extractor (dual contouring, 1024) and
-export the GLB to `outputs/stage2_mesh/<round>_trellis/<id>_dcx.glb`. About 8 minutes; 500k faces; carved fur,
-teeth and claws survive where Hunyuan gives a smooth blob (`docs/TRELLIS2_EVAL.md`). Then Stage 3 as usual —
-for a large print `--pitch 0.3 --faces 250000 --smooth 3`. Free 8188's VRAM first (`POST /free`) and never
-run both servers at once.
+- Z-Image sweeps: `load_clip_device: cpu` (default in `stage1_refs_z.yaml`) — with the encoder on the GPU a
+  branch can hang in VAE decode. Qwen-Image 2512 only with Ollama shut down.
+- Model families never share the card: finish Z-Image chunks, `POST /free {"unload_models":true}`, then Hunyuan.
+- Hunyuan3D settings are settled at octree 256 / 30 steps / threshold 0.6 (the sweep showed no difference at print
+  scale). rembg is mandatory (the control reconstructed the backdrop as a wall).
+- The full machine runbook (launch line with `--preview-method auto`, safe kill, memory guard, Ollama) is the
+  user-level Claude skill `comfy-local-ops`; the project runbook is `.claude/skills/bear-pipeline`.
