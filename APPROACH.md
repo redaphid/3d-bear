@@ -195,10 +195,12 @@ the outer surface (`hollow.py --outer keep`). The printer is the remaining ceili
 layers cannot render relief under ~0.5 mm, so a 0.4 mm nozzle or thinner layers is the next lever, not the
 mesh. The maximum-resolution TRELLIS runs were then measured (`docs/TRELLIS2_EVAL.md` §8): sparse 64 and 128 change
 the structure sampling — a different bear with a bigger head and softer fur, identical roughness at matched
-face count — so they add nothing; sparse 128 and a 2048 quad remesh exceed the box. The one open test, the
-same sparse-32 bear with a 1536 cascade, reached the decode step three times and each time lost its ~10 GB
-margin to Ollama's 17 GB of commit (a periodic `ollama stop` guard is worse: 15 GB reload spikes). It is a
-21-minute run once Ollama is killed with elevation; until then the current 240 mm totem is the ceiling.
+face count — so they add nothing; sparse 128 and a 2048 quad remesh exceed the box. The knob that *does* work is the
+**cascade**: the same sparse-32 bear re-run with a 1536 cascade and DCx at 1536 measures 7.28 / 17.82 / 58.83
+against 5.10 / 12.45 / 48.46 at matched face count (+43 % at p90), and shows deep combed fur on the forearms,
+a neck ruff and strand grooves across the back. That run peaks near 151 GB and only fits with
+`keep_models_loaded=false`, which drops ~9 GB of staged weights before the decode; three earlier attempts died
+at that exact step. The 240 mm totem is cut from it.
 
 ### Hollowing for the light (Stage 4 prep, `tools/hollow.py`)
 
@@ -284,7 +286,7 @@ keychain stage, and the user's chosen bear (round-4 `b`) delivered in every form
 
 | file (in `print-ready/`) | what |
 |---|---|
-| `totem-bear-r4b-TRELLIS-240mm-hollow-2.5mm.stl` | **the Goldrush totem**, 240 mm, high-detail, 2.5 mm wall, ~240 g |
+| `totem-bear-r4b-TRELLIS-240mm-hollow-2.5mm.stl` | **the Goldrush totem**, 240 mm, 1536-cascade source, 2.5 mm wall, ~243 g |
 | `totem-bear-r4b-TRELLIS-160mm-hollow-2mm.stl` | the same at 160 mm, 2 mm wall, ~97 g |
 | `keychain-bear-r4b-TRELLIS-corded-nfc-embedded.stl` | **the charm**, 34 mm, cord tunnel + a sealed NFC cavity in a 3.8 mm plate (pause at 2.2 mm, insert, resume) |
 | `keychain-bear-r4b-TRELLIS-32mm-corded-nfc.stl` | the same with an open recess underneath, for gluing the sticker in |
@@ -293,8 +295,10 @@ keychain stage, and the user's chosen bear (round-4 `b`) delivered in every form
 
 **Next steps, in order.**
 1. Print the totem (settings in `print-ready/README.md`; slice as a solid; decide on internal supports).
-2. If the maximum-resolution TRELLIS source lands and is visibly better, rebuild the 240 from it:
-   `mesh_repair.py --height 240 --pitch 0.3 --faces 250000 --smooth 3` then `hollow.py --wall 2.5 --outer keep`.
+2. Done: the 1536-cascade source landed, was visibly better, and the 240 mm totem is recut from it.
+   The 160 mm totem and the charms are still cut from the 1024-cascade mesh — recut them the same way if
+   the fur matters at those sizes (`mesh_repair.py --pitch 0.3 --faces 250000 --smooth 3`, then `hollow.py`
+   or `keychain.py`).
 3. Nozzle/layer choice is now the detail ceiling (0.4 mm nozzle or 0.12 mm layers), a hardware call.
 4. Showcase (`docs/index.html`) still stops at round 2; rounds 3–4, TRELLIS and the totem deserve a spread.
    It is published privately as an artifact; GitHub Pages needs one toggle by the owner (`main` / `/docs`).
