@@ -53,17 +53,23 @@ def main():
         label = a.labels[i] if a.labels and i < len(a.labels) else Path(p).name
         rows.append((label, tris, normals))
 
-    # one centre and radius for everybody so the panels line up at the same scale
-    allpts = np.concatenate([t.reshape(-1, 3) for _, t, _ in rows])
-    center = (allpts.min(0) + allpts.max(0)) / 2
-    corners = np.array([[x, y, z] for x in (allpts.min(0)[0], allpts.max(0)[0])
-                        for y in (allpts.min(0)[1], allpts.max(0)[1])
-                        for z in (allpts.min(0)[2], allpts.max(0)[2])]) - center
-    radius = max(np.abs(corners @ mv.camera(t).T[:, :2]).max() for _, t in VIEWS) * 1.04
+    # each row is centred on its own crop (generators place the bear differently in
+    # XY) but every panel shares one radius so the rows are at the same scale
+    centers, radius = [], 0.0
+    for _, tris, _ in rows:
+        pts = tris.reshape(-1, 3)
+        lo, hi = pts.min(0), pts.max(0)
+        c = (lo + hi) / 2
+        corners = np.array([[x, y, z] for x in (lo[0], hi[0]) for y in (lo[1], hi[1])
+                            for z in (lo[2], hi[2])]) - c
+        radius = max(radius, max(np.abs(corners @ mv.camera(t).T[:, :2]).max() for _, t in VIEWS))
+        centers.append(c)
+    radius *= 1.04
 
     fig, axes = plt.subplots(len(rows), len(VIEWS), figsize=(5.2 * len(VIEWS), 5.4 * len(rows)),
                              dpi=mv.DPI, facecolor=mv.BACKGROUND, squeeze=False)
     for r, (label, tris, normals) in enumerate(rows):
+        center = centers[r]
         classes = np.zeros(len(tris), int)
         for c, (name, toward) in enumerate(VIEWS):
             ax = axes[r, c]

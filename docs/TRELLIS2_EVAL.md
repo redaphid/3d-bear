@@ -201,3 +201,69 @@ about).
 8. **VRAM accounting.** `POST /free` on 8188 returned 200 but nvidia-smi showed
    no drop (WDDM hides per-process figures). The 4B model still fit with ~9.6 GB
    held by other processes; if it ever does not, stop 8188 rather than guess.
+
+## 8. Resolution knobs (measured 2026-09-10, evening)
+
+The question was whether pushing every resolution knob in the DCx graph gives
+a more detailed bear for a 240 mm print. Short answer: no. The knobs change
+the bear or break the box; they do not sharpen the same bear. All runs used
+seed 1135213831, `backend=sdpa`, DCx at 200 M stratified points, simplify to
+2 M, Meshlib fill, on a 122 to 127 GB commit baseline (WSL VM at 64 GB, Ollama
+runners 9 GB when loaded).
+
+| run | sparse | shape to cascade | quad remesh | DCx | tokens | wall | VRAM peak | commit peak | result |
+|---|---:|---|---:|---:|---:|---|---:|---:|---|
+| DCx (eval, section 2) | 32 | 512 to 1024 | 1024 | 1024 | 21,387 | 8:05 | 11.6 GB | ~102 GB | `b_dcx.glb`, 503k faces |
+| hi-res attempt 1 | 128 | 1024 to 1536 | 2048 | 1536 | | killed at 32 min | 23.7 GB | 157.8 GB | shape stage ran at 110 s/step, then the cascade pinned VRAM and thrashed into the commit limit; killed by hand |
+| hi-res attempt 2 | 64 | 1024 to 1536, from_resolution wired to 1024 | 2048 | 1536 | 8,116 | 10:08 | 14.5 GB | 146 GB | under-resolved (see gotcha below); kept as `b_dcx_hires_attempt1_underres.glb` |
+| hi-res attempt 3 | 64 | 1024 to 1536, from_resolution 512 | 2048 | 1536 | 44,460 | killed at 13 min | 23.4 GB | 155 GB | cascade fine; the 2048 remesh on the 41.7 M-face decode spiked commit 137 to 155 GB in 11 s; guard killed it |
+| hi-res attempt 4 | 64 | 1024 to 1536, from_resolution 512 | 1024 | 1536 | 44,460 | 20:24 | 16.7 GB | 148 GB | `b_dcx_hires.glb`, 2.0 M faces (12.07 M before simplify) |
+| sparse-128 retry | 128 | 1024 to 1536, from_resolution 512 | 1024 | 1536 | | killed at 30 min | 23.8 GB | 155 GB | shape stage at 234 s/step with Ollama's 5.8 GB on the card; an Ollama reload spike (+15 GB commit in 20 s) crossed the guard |
+| sparse-32, 1536 cascade | 32 | 512 to 1536 | 1024 | 1536 | 54,798 | killed at 21 min | 23.6 GB | 158 GB | all 12 cascade steps done (17:48), then the decode step (+10 GB, as in attempt 4) landed on a 148 GB baseline: Ollama was left loaded (13.9 + 3.9 GB commit, 5.8 GB VRAM) so the guard fired. Not retried; it would fit on the 122 GB baseline |
+
+What each knob actually does:
+
+- **Sparse structure resolution changes the bear, not its sharpness.** Sparse
+  64 with the same seed gives a different structure sample: bigger head,
+  smoother body and arms with softer fur strands, and DCx artefacts beside the
+  muzzle. At matched face count (the 2.0 M mesh decimated to 503k) its roughness
+  is 5.17 / 12.41 / 47.53 against 5.10 / 12.45 / 48.46 for the sparse-32 mesh,
+  i.e. identical. The lower raw numbers on the 2 M mesh (2.99 / 6.72 / 32.98) are
+  only the face count; never compare the dihedral metric across face counts.
+  Sparse 128 is 4x the tokens in the shape stage (110 to 234 s/step) and on this
+  box its 1536 cascade pins VRAM at 23.7 GB and runs into the commit limit.
+- **Cascade `from_resolution` gotcha.** `Trellis2ShapeCascadeGenerator`
+  divides the upsampled coords by `from_resolution * sparse_res / 32`. Wire it
+  to the shape generator's real resolution (1024 at sparse 64) and the 1536
+  stage is quantised to half density: 8,116 tokens instead of 44,460, a smooth
+  blobby bear, and a fast run that looks like success. The author's HQ example
+  passes the constant 512, which is right for any sparse resolution when the
+  shape stage runs at its native 16 x sparse. The DCx example wires it to the
+  shape output, which only works because 512 x 1 = 512 at sparse 32.
+- **Quad remesh 2048 is the knob that kills the box.** On the 1536 decode
+  (41.7 M faces at 44k tokens) it took commit from 137 to 155 GB in 11 s with
+  VRAM at 23.4 GB. 1024 is the ceiling while the WSL VM holds 64 GB; it gives
+  ~24 M faces regardless of decode density and DCx re-contours it anyway.
+- **DCx 1536 at 200 M points is fine**: 5.8 M occupied voxels at 34 points
+  per voxel (stratified needs ~3), cull 92 s, contouring 211 s, winding 8 s,
+  about 12 M faces before simplify, 1,224 holes for Meshlib.
+- **Ollama is the hidden variable.** Its runners reload within seconds of
+  being unloaded (a warm client keeps querying), each reload adds ~15 GB of
+  commit and 5.8 GB of VRAM, so a periodic `ollama stop` guard makes the
+  spikes worse, not better. Left loaded and steady it costs a flat 17.8 GB of
+  commit, which is exactly the margin a 1536 run needs (147 GB steady during
+  the cascade, 158 GB at the decode). Three of the kills above were Ollama,
+  either as a spike or as a baseline. Any 1536 TRELLIS run needs Ollama
+  actually stopped (elevated kill of the supervisor loop and its processes,
+  see `docs/OLLAMA_ON_SOUL.md`); `ollama stop` from an agent is blocked by the
+  permission classifier anyway.
+- **Guard that saved the box**: a loop reading system commit every 10 s and
+  stopping 8190 above 154 GB (`start.ps1 -Stop`). It fired four times; the
+  post-kill commit was 118 to 128 GB each time, so nothing else died.
+
+Close-up for this section: `outputs/stage2_mesh/round4z_trellis/b_closeup_dcx_vs_hires_240.png`
+(sparse 32 vs sparse 64, 240 mm, both full mesh). The "same structure, 1024 vs
+1536 cascade" comparison was not obtained: the one run allowed was killed at
+the decode (last row). It remains the only test that would show whether the
+cascade adds detail to the *same* bear, and it needs Ollama actually stopped
+so the run's own peak (about 150 GB on a 122 GB baseline) has room.
