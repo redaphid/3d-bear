@@ -41,6 +41,9 @@ def main() -> int:
     ap.add_argument("--height", type=float, default=None, help="printed height, mm (default: keep the input height)")
     ap.add_argument("--faces", type=int, default=80000, help="face budget after hollowing (two skins)")
     ap.add_argument("--density", type=float, default=1.24, help="g/cm^3 for the filament estimate")
+    ap.add_argument("--outer", choices=["keep", "voxel"], default="keep",
+                    help="keep = the input mesh IS the outer skin (all its detail survives; only the cavity is built from voxels); voxel = re-extract both skins")
+    ap.add_argument("--inner-faces", type=int, default=30000, help="face budget for the cavity skin in keep mode")
     ap.add_argument("--views", action="store_true")
     a = ap.parse_args()
     t0 = time.time()
@@ -56,9 +59,37 @@ def main() -> int:
 
     # ---- voxelise, distance from outside, keep the skin ---------------------------------------
     t = time.time()
-    vg = m.voxelized(a.pitch).fill()
-    S = np.pad(vg.matrix.astype(bool), 2)
-    origin = vg.translation - 2 * a.pitch
+    # Rasterise the surface in face chunks (bounded memory, unlike trimesh's whole-mesh subdivision
+    # which wants ~13 GB for a decimated 240k-face mesh), then close and flood-fill it into a solid
+    # exactly as mesh_repair does.
+    pad = 4
+    origin = m.bounds[0] - pad * a.pitch
+    shape = np.ceil((m.extents + 2 * pad * a.pitch) / a.pitch).astype(int) + 1
+    S = np.zeros(shape, dtype=bool)
+    # deterministic barycentric lattice per face at half-pitch spacing: cost follows surface area,
+    # not triangle shape, so decimation slivers cannot blow it up the way subdivision does
+    tri = m.triangles
+    edge = np.linalg.norm(np.stack([tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 1], tri[:, 0] - tri[:, 2]], 1), axis=2).max(1)
+    n_per = np.clip(np.ceil(edge / (a.pitch * 0.5)).astype(int), 1, 400)
+    for n in np.unique(n_per):
+        sel = tri[n_per == n]
+        i, j = np.meshgrid(np.arange(n + 1), np.arange(n + 1), indexing="ij")
+        keep = (i + j) <= n
+        u = (i[keep] / n)[None, :, None]; w = (j[keep] / n)[None, :, None]
+        for k in range(0, len(sel), 20000):
+            t3 = sel[k:k + 20000]
+            pts = t3[:, 0:1] + (t3[:, 1:2] - t3[:, 0:1]) * u + (t3[:, 2:3] - t3[:, 0:1]) * w
+            idx = np.clip(np.floor((pts.reshape(-1, 3) - origin) / a.pitch).astype(int), 0, shape - 1)
+            S[idx[:, 0], idx[:, 1], idx[:, 2]] = True
+    shell_vox = int(S.sum())
+    for radius in (2, 3, 5):
+        solid = ndimage.binary_dilation(S, iterations=radius)
+        solid = ndimage.binary_fill_holes(solid)
+        solid = ndimage.binary_erosion(solid, iterations=radius) | S
+        if int((solid & ~S).sum()) >= shell_vox:
+            break
+    S = solid
+    mr.log("hollow", f"rasterised {shell_vox:,} shell voxels, filled to {int(S.sum()):,} solid voxels (closing radius {radius})  ({time.time() - t:.1f} s)")
     dist = ndimage.distance_transform_edt(S) * a.pitch
     inner = dist > a.wall
     # keep only the main cavity: isolated pockets inside thick regions would become extra closed
@@ -72,48 +103,70 @@ def main() -> int:
                      f"({shell.sum() / S.sum():.0%} of the material); {n_cav} cavity pocket(s), kept the largest  ({time.time() - t:.1f} s)")
 
     t = time.time()
-    field = ndimage.gaussian_filter(shell.astype(np.float32), 0.6)
-    verts, faces, _, _ = measure.marching_cubes(field, level=0.5)
-    sh = trimesh.Trimesh(verts[:, [0, 1, 2]] * a.pitch + origin, faces, process=True)
-    sh.update_faces(sh.nondegenerate_faces()); sh.update_faces(sh.unique_faces())
-    parts = sorted(sh.split(only_watertight=False), key=lambda p: len(p.faces), reverse=True)
-    if len(parts) > 2:
-        debris = ", ".join(f"{len(p.faces):,}" for p in parts[2:])
-        mr.log("extract", f"{len(parts)} skins; keeping the outer and inner ({len(parts[0].faces):,} / {len(parts[1].faces):,} faces), dropping debris of {debris} faces")
-        sh = trimesh.util.concatenate(parts[:2])
-    # Marching cubes orients both skins from material toward air: outer faces out, inner faces
-    # into the cavity. That is the correct hollow-solid orientation; do NOT run a per-body
-    # winding fix here (it would flip the cavity into a second solid). Just check the sign.
-    if sh.volume < 0:
-        sh.invert()
-    expect = shell.sum() * a.pitch ** 3
-    mr.log("extract", f"marching cubes: {len(sh.faces):,} faces, {sh.body_count} skins, volume {sh.volume / 1000:.0f} cm^3 "
-                      f"(voxel estimate {expect / 1000:.0f})  ({time.time() - t:.1f} s)")
+    if a.outer == "keep":
+        # Only the cavity comes from the voxel grid; the detailed outer surface is the input itself.
+        field = ndimage.gaussian_filter(inner.astype(np.float32), 0.6)
+        verts, faces, _, _ = measure.marching_cubes(field, level=0.5)
+        cav = trimesh.Trimesh(verts * a.pitch + origin, faces, process=True)
+        cav.update_faces(cav.nondegenerate_faces()); cav.update_faces(cav.unique_faces())
+        parts = sorted(cav.split(only_watertight=False), key=lambda q: len(q.faces), reverse=True)
+        cav = parts[0]
+        if cav.volume < 0:
+            cav.invert()
+        cav = mr.decimate(cav, a.inner_faces)
+        if cav.volume < 0:
+            cav.invert()
+        cav.invert()                                   # faces into the cavity
+        outer = m.copy()
+        sh = trimesh.util.concatenate([outer, cav])
+        mr.log("cavity", f"cavity skin {len(parts[0].faces):,} -> {len(cav.faces):,} faces; outer skin kept as input ({len(outer.faces):,} faces); "
+                         f"shell volume {sh.volume / 1000:.0f} cm^3  ({time.time() - t:.1f} s)")
+        skip_extract = True
+    else:
+        skip_extract = False
+    if not skip_extract:
+        field = ndimage.gaussian_filter(shell.astype(np.float32), 0.6)
+        verts, faces, _, _ = measure.marching_cubes(field, level=0.5)
+        sh = trimesh.Trimesh(verts[:, [0, 1, 2]] * a.pitch + origin, faces, process=True)
+        sh.update_faces(sh.nondegenerate_faces()); sh.update_faces(sh.unique_faces())
+        parts = sorted(sh.split(only_watertight=False), key=lambda p: len(p.faces), reverse=True)
+        if len(parts) > 2:
+            debris = ", ".join(f"{len(p.faces):,}" for p in parts[2:])
+            mr.log("extract", f"{len(parts)} skins; keeping the outer and inner ({len(parts[0].faces):,} / {len(parts[1].faces):,} faces), dropping debris of {debris} faces")
+            sh = trimesh.util.concatenate(parts[:2])
+        # Marching cubes orients both skins from material toward air: outer faces out, inner faces
+        # into the cavity. That is the correct hollow-solid orientation; do NOT run a per-body
+        # winding fix here (it would flip the cavity into a second solid). Just check the sign.
+        if sh.volume < 0:
+            sh.invert()
+        expect = shell.sum() * a.pitch ** 3
+        mr.log("extract", f"marching cubes: {len(sh.faces):,} faces, {sh.body_count} skins, volume {sh.volume / 1000:.0f} cm^3 "
+                          f"(voxel estimate {expect / 1000:.0f})  ({time.time() - t:.1f} s)")
 
-    # Decimate each skin on its own with a quadric collapse (the outer keeps most of the budget;
-    # nobody sees the inside). A global simplify with a tolerance near the wall thickness pushes
-    # the skins through each other, so that is avoided entirely.
-    t = time.time()
-    skins = sorted(sh.split(only_watertight=False), key=lambda p: len(p.faces), reverse=True)
-    budget = [int(a.faces * 0.65), int(a.faces * 0.35)]
-    out_skins = []
-    for skin, target in zip(skins, budget):
-        inverted = skin.volume < 0             # the cavity skin faces inward; decimate it as a normal solid
-        if inverted:
-            skin = skin.copy(); skin.invert()
-        d = mr.decimate(skin, target)          # quadric first, manifold3d simplify if that breaks the skin
-        if not d.is_watertight or len(d.faces) < target // 4:
-            raise SystemExit(f"skin decimation broke a skin ({len(skin.faces):,} -> {len(d.faces):,} faces)")
-        if d.volume < 0:
-            d.invert()
-        if inverted:
-            d.invert()                         # back to facing the cavity
-        out_skins.append(d)
-    sh = trimesh.util.concatenate(out_skins)
-    mr.log("decimate", f"skins {len(skins[0].faces):,}/{len(skins[1].faces):,} -> {len(out_skins[0].faces):,}/{len(out_skins[1].faces):,} faces, "
-                       f"volume {sh.volume / 1000:.0f} cm^3  ({time.time() - t:.1f} s)")
+        # Decimate each skin on its own with a quadric collapse (the outer keeps most of the budget;
+        # nobody sees the inside). A global simplify with a tolerance near the wall thickness pushes
+        # the skins through each other, so that is avoided entirely.
+        t = time.time()
+        skins = sorted(sh.split(only_watertight=False), key=lambda p: len(p.faces), reverse=True)
+        budget = [int(a.faces * 0.65), int(a.faces * 0.35)]
+        out_skins = []
+        for skin, target in zip(skins, budget):
+            inverted = skin.volume < 0             # the cavity skin faces inward; decimate it as a normal solid
+            if inverted:
+                skin = skin.copy(); skin.invert()
+            d = mr.decimate(skin, target)          # quadric first, manifold3d simplify if that breaks the skin
+            if not d.is_watertight or len(d.faces) < target // 4:
+                raise SystemExit(f"skin decimation broke a skin ({len(skin.faces):,} -> {len(d.faces):,} faces)")
+            if d.volume < 0:
+                d.invert()
+            if inverted:
+                d.invert()                         # back to facing the cavity
+            out_skins.append(d)
+        sh = trimesh.util.concatenate(out_skins)
+        mr.log("decimate", f"skins {len(skins[0].faces):,}/{len(skins[1].faces):,} -> {len(out_skins[0].faces):,}/{len(out_skins[1].faces):,} faces, "
+                           f"volume {sh.volume / 1000:.0f} cm^3  ({time.time() - t:.1f} s)")
 
-    # ---- open the base: cut the bottom --wall mm so the cavity is reachable --------------------
+        # ---- open the base: cut the bottom --wall mm so the cavity is reachable --------------------
     # Direct manifold3d subtraction: trimesh's boolean wrapper re-orients the inner skin into a
     # second solid, which is exactly what must not happen to a cavity.
     lo, hi = sh.bounds

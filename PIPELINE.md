@@ -200,10 +200,14 @@ stays closed: at this scale the piece prints solid and there is no pole or light
 ## Stage 4 prep — hollowing (CPU, ~90 s at 160 mm)
 
 `python tools/hollow.py print-ready/<bear>.stl --out print-ready/totem-<bear>-hollow-2mm.stl --wall 2.0 --pitch 0.4 --height 160 --views`
-voxelises the validated solid, keeps only the voxels within `--wall` of the surface (Euclidean distance
-transform), re-extracts the two skins, decimates each skin on its own, then cuts the bottom `--wall` mm
+rasterises the validated solid (a barycentric point lattice per face — bounded by area, immune to the
+decimation slivers that make trimesh's subdivision voxeliser ask for 13 GB), keeps only the voxels within
+`--wall` of the surface (Euclidean distance transform) and, in the default `--outer keep` mode, builds only
+the cavity skin from that grid while the detailed input surface stays the outer skin untouched (`--outer
+voxel` re-extracts both). Then it cuts the bottom `--wall` mm
 with manifold3d so the cavity opens through the plinth. Isolated pockets inside thick regions are filled
 back in; thin features (ears, claws) stay solid on their own. Reports the wall as built, the base opening,
-and the material volume as a filament estimate. Rules learned: never run a per-body winding fix on the
+and the material volume as a filament estimate. Rules learned: for a large print use `mesh_repair.py --pitch 0.3 --faces 250000 --smooth 3` first (the 240 mm
+bear went from a faceted blob at 0.5/60k/taubin 10 to eyes, teeth and fur ridges); never run a per-body winding fix on the
 shell (it turns the cavity into a second solid), never simplify the assembled shell with a tolerance near
 the wall (the skins cross), and call manifold3d directly for the cut (trimesh's wrapper re-orients skins).
