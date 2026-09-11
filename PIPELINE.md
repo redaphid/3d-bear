@@ -200,7 +200,8 @@ Strength is the thinnest horizontal section: ring 2.2 mm 7.5 mm², ring 3.0 mm 1
 ~55 mm². Sinking a ring deeper does not help. `--nfc` adds a 1.5 mm riser under the plinth and recesses a 10.5 x 0.8 mm
 NTAG215 sticker pocket into its underside (spec and perimeter rule from `D:\Projects
 fc-bead`). The base stays
-closed: the piece prints solid.
+closed: the piece prints solid. `--nfc` adds a 1.5 mm riser under the plinth and recesses a 10.5 x 0.8 mm NTAG215 sticker pocket into its
+underside (spec and the 16-point perimeter rule from D:/Projects/nfc-bead).
 
 ## Stage 4 prep — hollowing (CPU, ~90 s at 160 mm)
 
