@@ -11,6 +11,9 @@
 - --style hole (recommended for a thin stretch cord) bores a --hole mm tunnel straight through the
   figure at --hole-z of its height. No added geometry, and the load is carried by the whole
   section there (about 55 mm^2) instead of by a thin loop (14 mm^2 for a 3 mm ring).
+- --nfc recesses an NTAG215 sticker pocket (10.5 x 0.8 mm, spec from D:/Projects/nfc-bead) into the underside
+  of the plinth after adding a --riser (1.5 mm) so the floor over the chip stays thick; the pocket centre is
+  the point of the base outline with the most clearance and it must pass the recipe's 16-point perimeter check.
 - --style bail makes a slab with a drilled hole; --style torus makes a ring. For a ring the
   weak point is its own widest line, two bare tube circles, and sinking it deeper does NOT help.
 - The ring is a torus (hole diameter --hole, tube diameter --tube, in printed mm) whose plane is
@@ -64,6 +67,45 @@ def difference(a: trimesh.Trimesh, b: trimesh.Trimesh) -> trimesh.Trimesh:
     return _boolean(a, b, "difference")
 
 
+def nfc_pocket(out, a):
+    """Riser under the base outline, then a sticker pocket recessed into its underside."""
+    from shapely.geometry import Polygon, Point
+    lo = out.bounds[0]
+    sec = out.section(plane_origin=[0, 0, lo[2] + 0.1], plane_normal=[0, 0, 1])
+    polys = sorted([Polygon(l[:, :2]) for l in sec.discrete if len(l) > 3], key=lambda q: q.area, reverse=True)
+    base = polys[0].buffer(0)
+    # best centre = the point of the outline with the largest clearance (a 0.25 mm grid search)
+    b = base.bounds; best = None
+    for x in np.arange(b[0], b[2], 0.25):
+        for y in np.arange(b[1], b[3], 0.25):
+            pt = Point(x, y)
+            if base.contains(pt):
+                d = base.exterior.distance(pt)
+                if best is None or d > best[0]:
+                    best = (d, x, y)
+    clear, cx, cy = best
+    r = a.nfc_diameter / 2
+    wall = clear - r
+    if wall < 1.0:
+        raise SystemExit(f"NFC pocket does not fit: {a.nfc_diameter:g} mm pocket leaves {wall:.2f} mm of wall (need >= 1.0); shrink --nfc-diameter or enlarge the plinth")
+    # 16-point perimeter check, as the bead recipe does
+    misses = [k for k in range(16) if not base.contains(Point(cx + r * np.cos(k * np.pi / 8), cy + r * np.sin(k * np.pi / 8)))]
+    if misses:
+        raise SystemExit(f"NFC perimeter check failed at points {misses}")
+    riser = trimesh.creation.extrude_polygon(base, a.riser + 0.3)      # +0.3 overlaps into the bear for a clean union
+    riser.apply_translation([0, 0, lo[2] - a.riser])
+    out = union(out, riser)
+    pocket = trimesh.creation.cylinder(radius=r, height=a.nfc_depth + 2.0, sections=96)
+    pocket.apply_translation([cx, cy, lo[2] - a.riser + a.nfc_depth - (a.nfc_depth + 2.0) / 2])
+    out = difference(out, pocket)
+    out.apply_translation([0, 0, -out.bounds[0][2]])
+    floor = a.riser - a.nfc_depth + 1.8
+    log(f"nfc pocket {a.nfc_diameter:g} x {a.nfc_depth:g} mm at ({cx:.1f}, {cy:.1f}), wall {wall:.1f} mm all round (16/16 perimeter points inside); "
+        f"riser {a.riser:g} mm under a {base.area:.0f} mm^2 plinth; floor above the chip ~{a.riser - a.nfc_depth:.1f} mm of riser + the plinth")
+    validate(out, "nfc")
+    return out
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("stl")
@@ -81,6 +123,10 @@ def main() -> int:
     ap.add_argument("--through", choices=["head", "all"], default="head",
                     help="hole style only: head = bore only the central island and stop inside the gaps to the arms; all = full width")
     ap.add_argument("--column", type=float, default=0.18, help="half-width of the central column as a fraction of the model width")
+    ap.add_argument("--nfc", action="store_true", help="recess an NFC sticker pocket into the underside of the plinth (NTAG215 spec from D:/Projects/nfc-bead)")
+    ap.add_argument("--nfc-diameter", type=float, default=10.5, help="pocket diameter, mm (10 mm sticker + clearance)")
+    ap.add_argument("--nfc-depth", type=float, default=0.8, help="pocket depth, mm")
+    ap.add_argument("--riser", type=float, default=1.5, help="extra plinth thickness added under the base so the pocket floor stays >= 2 mm, mm")
     ap.add_argument("--views", action="store_true")
     a = ap.parse_args()
 
@@ -147,6 +193,8 @@ def main() -> int:
         log(f"cord hole  {a.hole:g} mm through the {a.through} at z {z_drill:.1f} mm ({a.hole_z:.0%}), axis {a.plane}; "
             f"head island {hi - lo:.1f} mm wide, {head['area']:.0f} mm^2, gap to arms {gap:.1f} mm; "
             f"bore {length:.1f} mm long; skull section left around the bore {rem:.1f} mm^2")
+        if a.nfc:
+            out = nfc_pocket(out, a)
         out.export(a.out)
         e = out.extents
         log(f"wrote {a.out}  {len(out.faces):,} faces  {e[0]:.1f} x {e[1]:.1f} x {e[2]:.1f} mm  ({time.time() - t0:.1f} s)")
@@ -190,6 +238,8 @@ def main() -> int:
 
     out = union(m, ring)
     validate(out, "union")
+    if a.nfc:
+        out = nfc_pocket(out, a)
     out.export(a.out)
     ext2 = out.extents
     log(f"wrote {a.out}  {len(out.faces):,} faces  {ext2[0]:.1f} x {ext2[1]:.1f} x {ext2[2]:.1f} mm  ({time.time() - t0:.1f} s)")

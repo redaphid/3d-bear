@@ -197,7 +197,10 @@ the user chose for a 1 mm stretch cord) bores a `--hole 3.0` mm tunnel through t
 island in the slice at `--hole-z 0.86` of the height, stopping inside the gaps to the raised arms; `--style
 torus` fuses a ring (`--hole --tube --plane front|side --sink`), `--style bail` a slab with a drilled hole.
 Strength is the thinnest horizontal section: ring 2.2 mm 7.5 mm², ring 3.0 mm 14 mm², bail 24 mm², skull bore
-~55 mm². Sinking a ring deeper does not help. The base stays closed: the piece prints solid.
+~55 mm². Sinking a ring deeper does not help. `--nfc` adds a 1.5 mm riser under the plinth and recesses a 10.5 x 0.8 mm
+NTAG215 sticker pocket into its underside (spec and perimeter rule from `D:\Projects
+fc-bead`). The base stays
+closed: the piece prints solid.
 
 ## Stage 4 prep — hollowing (CPU, ~90 s at 160 mm)
 
