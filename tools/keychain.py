@@ -50,12 +50,17 @@ def _boolean(a: trimesh.Trimesh, b: trimesh.Trimesh, op: str) -> trimesh.Trimesh
     r = ((ma + mb) if op == "union" else (ma - mb)).to_mesh()
     m = trimesh.Trimesh(np.asarray(r.vert_properties)[:, :3], np.asarray(r.tri_verts), process=False)
     m.merge_vertices()
+    # manifold3d output is already consistently oriented, including cavity skins (an embedded NFC
+    # pocket is one). Keep every body except zero-volume debris; never per-body fix normals — that
+    # would flip a cavity into a second solid.
     parts = m.split(only_watertight=False)
     if len(parts) > 1:
-        parts = sorted(parts, key=lambda p: p.volume, reverse=True)
-        log(f"{op} produced {len(parts)} bodies; kept the largest ({parts[0].volume:.0f} mm^3)")
-        m = parts[0]
-    m.fix_normals()
+        keep = [p for p in parts if abs(p.volume) >= 0.5]
+        if len(keep) < len(parts):
+            log(f"{op}: dropped {len(parts) - len(keep)} debris bodies under 0.5 mm^3")
+        m = trimesh.util.concatenate(keep) if len(keep) > 1 else keep[0]
+    if m.volume < 0:
+        m.invert()
     return m
 
 
@@ -92,16 +97,31 @@ def nfc_pocket(out, a):
     misses = [k for k in range(16) if not base.contains(Point(cx + r * np.cos(k * np.pi / 8), cy + r * np.sin(k * np.pi / 8)))]
     if misses:
         raise SystemExit(f"NFC perimeter check failed at points {misses}")
-    riser = trimesh.creation.extrude_polygon(base, a.riser + 0.3)      # +0.3 overlaps into the bear for a clean union
+    # inset the outline 0.1 mm so the riser's side wall is never coincident with the bear's (coincident
+    # walls leave sliver triangles that manifold3d tolerates but slicers and trimesh flag)
+    riser = trimesh.creation.extrude_polygon(base.buffer(-0.1), a.riser + 0.3)   # +0.3 overlaps into the bear
     riser.apply_translation([0, 0, lo[2] - a.riser])
     out = union(out, riser)
-    pocket = trimesh.creation.cylinder(radius=r, height=a.nfc_depth + 2.0, sections=96)
-    pocket.apply_translation([cx, cy, lo[2] - a.riser + a.nfc_depth - (a.nfc_depth + 2.0) / 2])
+    plate_z = lo[2] - a.riser                                   # the new bottom of the plinth
+    if a.nfc_mode == "embed":
+        # a sealed cavity: floor of --nfc-floor above the plate, --nfc-depth tall, plinth above it
+        pocket = trimesh.creation.cylinder(radius=r, height=a.nfc_depth, sections=96)
+        pocket.apply_translation([cx, cy, plate_z + a.nfc_floor + a.nfc_depth / 2])
+        top = a.nfc_floor + a.nfc_depth
+        ceiling = (a.riser + 1.8) - top                             # ~1.8 mm is the plinth at 20 %
+        if ceiling < 0.8:
+            raise SystemExit(f"only {ceiling:.1f} mm of plinth above the pocket; raise --riser")
+        pause = f"PAUSE the print at {top:.1f} mm (after layer {round(top / 0.2)} at 0.2 mm layers), drop the sticker in face-down, resume; the next layer bridges over it"
+    else:
+        pocket = trimesh.creation.cylinder(radius=r, height=a.nfc_depth + 2.0, sections=96)
+        pocket.apply_translation([cx, cy, plate_z + a.nfc_depth - (a.nfc_depth + 2.0) / 2])
+        ceiling = (a.riser + 1.8) - a.nfc_depth
+        pause = "open recess in the underside; glue the sticker in"
     out = difference(out, pocket)
     out.apply_translation([0, 0, -out.bounds[0][2]])
-    floor = a.riser - a.nfc_depth + 1.8
-    log(f"nfc pocket {a.nfc_diameter:g} x {a.nfc_depth:g} mm at ({cx:.1f}, {cy:.1f}), wall {wall:.1f} mm all round (16/16 perimeter points inside); "
-        f"riser {a.riser:g} mm under a {base.area:.0f} mm^2 plinth; floor above the chip ~{a.riser - a.nfc_depth:.1f} mm of riser + the plinth")
+    log(f"nfc pocket {a.nfc_mode}: {a.nfc_diameter:g} x {a.nfc_depth:g} mm at ({cx:.1f}, {cy:.1f}), wall {wall:.1f} mm all round (16/16 perimeter points inside); "
+        f"riser {a.riser:g} mm under a {base.area:.0f} mm^2 plinth -> plate {a.riser + 1.8:.1f} mm thick, "
+        f"{a.nfc_floor if a.nfc_mode == 'embed' else 0:.1f} mm floor, {ceiling:.1f} mm over the chip. {pause}")
     validate(out, "nfc")
     return out
 
@@ -124,9 +144,12 @@ def main() -> int:
                     help="hole style only: head = bore only the central island and stop inside the gaps to the arms; all = full width")
     ap.add_argument("--column", type=float, default=0.18, help="half-width of the central column as a fraction of the model width")
     ap.add_argument("--nfc", action="store_true", help="recess an NFC sticker pocket into the underside of the plinth (NTAG215 spec from D:/Projects/nfc-bead)")
-    ap.add_argument("--nfc-diameter", type=float, default=10.5, help="pocket diameter, mm (10 mm sticker + clearance)")
-    ap.add_argument("--nfc-depth", type=float, default=0.8, help="pocket depth, mm")
-    ap.add_argument("--riser", type=float, default=1.5, help="extra plinth thickness added under the base so the pocket floor stays >= 2 mm, mm")
+    ap.add_argument("--nfc-mode", choices=["embed", "open"], default="embed",
+                    help="embed = sealed cavity inside the plinth: pause the print at the reported height, drop the sticker in, resume (default); open = recess in the underside, sticker glued in")
+    ap.add_argument("--nfc-diameter", type=float, default=11.0, help="pocket diameter, mm (10 mm sticker; 11.0 so it drops in by hand mid-print, holes print ~0.3 mm small)")
+    ap.add_argument("--nfc-depth", type=float, default=1.0, help="pocket depth, mm (sticker is ~0.4; the rest is air so the bridge over it lands clean)")
+    ap.add_argument("--nfc-floor", type=float, default=1.2, help="embed only: solid floor under the pocket, mm (6 layers at 0.2)")
+    ap.add_argument("--riser", type=float, default=2.0, help="extra plinth thickness added under the base, mm (the plinth alone is ~1.8 mm at 20 %%)")
     ap.add_argument("--views", action="store_true")
     a = ap.parse_args()
 
