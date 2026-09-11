@@ -193,8 +193,12 @@ claws are all there (`print-ready/preview-totem-r4b-TRELLIS-240mm-closeup.png`).
 pitch and the face budget, smoothing beyond ~3 passes eats fur, and the hollowing step must never resample
 the outer surface (`hollow.py --outer keep`). The printer is the remaining ceiling: 0.6 mm nozzle × 0.2 mm
 layers cannot render relief under ~0.5 mm, so a 0.4 mm nozzle or thinner layers is the next lever, not the
-mesh. A maximum-resolution TRELLIS source (sparse 64–128, 1536 cascade) is the last mesh-side lever and was
-being generated at the time of writing.
+mesh. The maximum-resolution TRELLIS runs were then measured (`docs/TRELLIS2_EVAL.md` §8): sparse 64 and 128 change
+the structure sampling — a different bear with a bigger head and softer fur, identical roughness at matched
+face count — so they add nothing; sparse 128 and a 2048 quad remesh exceed the box. The one open test, the
+same sparse-32 bear with a 1536 cascade, reached the decode step three times and each time lost its ~10 GB
+margin to Ollama's 17 GB of commit (a periodic `ollama stop` guard is worse: 15 GB reload spikes). It is a
+21-minute run once Ollama is killed with elevation; until then the current 240 mm totem is the ceiling.
 
 ### Hollowing for the light (Stage 4 prep, `tools/hollow.py`)
 
