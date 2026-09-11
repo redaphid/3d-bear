@@ -205,11 +205,12 @@ about).
 ## 8. Resolution knobs (measured 2026-09-10, evening)
 
 The question was whether pushing every resolution knob in the DCx graph gives
-a more detailed bear for a 240 mm print. Short answer: no. The knobs change
-the bear or break the box; they do not sharpen the same bear. All runs used
-seed 1135213831, `backend=sdpa`, DCx at 200 M stratified points, simplify to
-2 M, Meshlib fill, on a 122 to 127 GB commit baseline (WSL VM at 64 GB, Ollama
-runners 9 GB when loaded).
+a more detailed bear for a 240 mm print. Answer: **one knob does, the cascade
+to 1536 with DCx at 1536, on the same sparse-32 structure**. The sparse
+resolution changes the bear instead of sharpening it, and two settings break
+the box. All runs used seed 1135213831, `backend=sdpa`, DCx at 200 M
+stratified points, simplify to 2 M, Meshlib fill, on a 122 to 135 GB commit
+baseline (WSL VM at 64 GB, Ollama runners 18 GB when loaded).
 
 | run | sparse | shape to cascade | quad remesh | DCx | tokens | wall | VRAM peak | commit peak | result |
 |---|---:|---|---:|---:|---:|---|---:|---:|---|
@@ -219,7 +220,8 @@ runners 9 GB when loaded).
 | hi-res attempt 3 | 64 | 1024 to 1536, from_resolution 512 | 2048 | 1536 | 44,460 | killed at 13 min | 23.4 GB | 155 GB | cascade fine; the 2048 remesh on the 41.7 M-face decode spiked commit 137 to 155 GB in 11 s; guard killed it |
 | hi-res attempt 4 | 64 | 1024 to 1536, from_resolution 512 | 1024 | 1536 | 44,460 | 20:24 | 16.7 GB | 148 GB | `b_dcx_hires.glb`, 2.0 M faces (12.07 M before simplify) |
 | sparse-128 retry | 128 | 1024 to 1536, from_resolution 512 | 1024 | 1536 | | killed at 30 min | 23.8 GB | 155 GB | shape stage at 234 s/step with Ollama's 5.8 GB on the card; an Ollama reload spike (+15 GB commit in 20 s) crossed the guard |
-| sparse-32, 1536 cascade | 32 | 512 to 1536 | 1024 | 1536 | 54,798 | killed at 21 min | 23.6 GB | 158 GB | all 12 cascade steps done (17:48), then the decode step (+10 GB, as in attempt 4) landed on a 148 GB baseline: Ollama was left loaded (13.9 + 3.9 GB commit, 5.8 GB VRAM) so the guard fired. Not retried; it would fit on the 122 GB baseline |
+| sparse-32, 1536 cascade (1st) | 32 | 512 to 1536 | 1024 | 1536 | 54,798 | killed at 21 min | 23.6 GB | 158 GB | all 12 cascade steps done (17:48); the decode step (+10 GB) landed on a 148 GB baseline (Ollama loaded, models kept staged) and the guard fired |
+| **sparse-32, 1536 cascade (2nd)** | 32 | 512 to 1536 | 1024 | 1536 | 54,798 | 31:32 | 23.8 GB | 151 GB | same run with `keep_models_loaded=false`, which drops ~9 GB of staged weights before the decode: **`b_dcx_s32_c1536.glb`, 2.0 M faces (12.16 M before simplify)** |
 
 What each knob actually does:
 
@@ -232,6 +234,12 @@ What each knob actually does:
   only the face count; never compare the dihedral metric across face counts.
   Sparse 128 is 4x the tokens in the shape stage (110 to 234 s/step) and on this
   box its 1536 cascade pins VRAM at 23.7 GB and runs into the commit limit.
+- **The 1536 cascade is the knob that adds detail.** On the same sparse-32
+  structure it raises matched-count roughness by 43 % at p90 and the fur is
+  visibly deeper. It costs 31 min instead of 8, 54,798 tokens at ~85 s/step on
+  SDPA, and about 150 GB of commit on this box: it only fits with
+  `keep_models_loaded=false` (the first attempt, with models kept staged, was
+  killed at 158 GB at the decode) and with Ollama steady, not oscillating.
 - **Cascade `from_resolution` gotcha.** `Trellis2ShapeCascadeGenerator`
   divides the upsampled coords by `from_resolution * sparse_res / 32`. Wire it
   to the shape generator's real resolution (1024 at sparse 64) and the 1536
@@ -253,17 +261,23 @@ What each knob actually does:
   spikes worse, not better. Left loaded and steady it costs a flat 17.8 GB of
   commit, which is exactly the margin a 1536 run needs (147 GB steady during
   the cascade, 158 GB at the decode). Three of the kills above were Ollama,
-  either as a spike or as a baseline. Any 1536 TRELLIS run needs Ollama
-  actually stopped (elevated kill of the supervisor loop and its processes,
-  see `docs/OLLAMA_ON_SOUL.md`); `ollama stop` from an agent is blocked by the
-  permission classifier anyway.
+  either as a spike or as a baseline. A 1536 run fits beside a *steady* loaded
+  Ollama only with `keep_models_loaded=false`; with Ollama actually stopped
+  (elevated kill of the supervisor loop and its processes, see
+  `docs/OLLAMA_ON_SOUL.md`) there would be 18 GB of slack. `ollama stop` from
+  an agent is blocked by the permission classifier anyway.
 - **Guard that saved the box**: a loop reading system commit every 10 s and
   stopping 8190 above 154 GB (`start.ps1 -Stop`). It fired four times; the
-  post-kill commit was 118 to 128 GB each time, so nothing else died.
+  post-kill commit was 118 to 128 GB each time, so nothing else died. The run
+  that finally fit peaked at 151 GB, 3 GB under the line.
 
-Close-up for this section: `outputs/stage2_mesh/round4z_trellis/b_closeup_dcx_vs_hires_240.png`
-(sparse 32 vs sparse 64, 240 mm, both full mesh). The "same structure, 1024 vs
-1536 cascade" comparison was not obtained: the one run allowed was killed at
-the decode (last row). It remains the only test that would show whether the
-cascade adds detail to the *same* bear, and it needs Ollama actually stopped
-so the run's own peak (about 150 GB on a 122 GB baseline) has room.
+Close-ups for this section: `outputs/stage2_mesh/round4z_trellis/b_closeup_dcx_vs_hires_240.png`
+(sparse 32 vs sparse 64, 240 mm, both full mesh) and
+`b_closeup_dcx_vs_s32c1536_240.png` (same structure, 1024 vs 1536 cascade,
+240 mm). The second one is the result that matters: same bear, same pose and
+claws, but the 1536 version carves clearly deeper fur on the forearms, a
+defined ruff around the neck, and strand grooves across the back where the
+1024 version has faint lines. At matched face count (both decimated to
+503,374) the roughness goes from 5.10 / 12.45 / 48.46 to **7.28 / 17.82 /
+58.83**, a 43 % rise at p90, where sparse 64 gave 5.17 / 12.41 / 47.53. For a
+240 mm print, `b_dcx_s32_c1536.glb` is the better source.
