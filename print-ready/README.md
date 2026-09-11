@@ -28,6 +28,20 @@ uses the older recipe instead: 2 walls, 0 % infill, **0 bottom layers**.
 
 Keychain: solid (100 % infill or 4+ walls), no supports.
 
+## Inserting the NFC sticker mid-print
+
+`keychain-bear-r4b-TRELLIS-corded-nfc-embedded.stl` is built to have the chip sealed inside it:
+
+1. Slice standing up, solid, no supports, 0.2 mm layers.
+2. Add a pause (Elegoo Slicer / Bambu Studio: right-click the layer slider) at **2.2 mm — after layer 11**.
+3. At the pause the pocket is an open 11 mm well in the plate. Drop the 10 mm NTAG215 sticker in face-down.
+   It does not need glue; the plate closes over it.
+4. Resume. The next layer bridges the 11 mm opening — a short bridge, and the sticker supports most of it.
+
+The chip ends up with 1.2 mm of plastic below it and 1.6 mm above, invisible and not removable. Read range
+through that is not a concern for an NTAG215. If you would rather not pause the print, use
+`keychain-bear-r4b-TRELLIS-32mm-corded-nfc.stl`, which has an open recess in the underside to glue into.
+
 ## Superseded (kept for the write-up)
 
 | file | why it was superseded |

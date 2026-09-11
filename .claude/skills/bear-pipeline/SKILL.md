@@ -56,6 +56,11 @@ the PNG/GLB metadata is the re-runnable workflow) or the per-file watcher patter
 - **Hollow = modelled shell (`tools/hollow.py`), sliced as a solid**; cavity ceilings are the overhangs to
   decide on. Never per-body winding fixes, never trimesh's boolean wrapper, never a global simplify near the
   wall thickness, never trimesh's subdivision voxeliser on a decimated mesh (see the tool's docstring).
+- **NFC pocket (`--nfc`)**: spec lives in the sibling project `D:\Projects\nfc-bead` (NTAG215 10 mm sticker,
+  ≥ 1 mm wall, 16-point perimeter raycast). Default `--nfc-mode embed` seals the chip inside a thickened
+  plate and prints the pause height to insert it at; `open` recesses the underside for gluing. Booleans must
+  keep cavity skins (no per-body winding fix, no keep-largest-body), and inset the riser outline 0.1 mm or
+  the exported STL is non-watertight from coincident walls — always check the file, not the in-memory mesh.
 - **Keychain for a cord = a bored tunnel, not a loop** (`--style hole --through head --hole-z 0.86`): a ring
   is weakest at its own equator and sinking it changes nothing; the bail looked like hardware. The user said
   no loop, no wall between the legs, hole through the head not the arm.

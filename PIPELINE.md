@@ -189,20 +189,6 @@ item to `blueprints/stage2_mesh.yaml`, build, run. Vary `octree` (256 → 384 �
 - The full machine runbook (launch line with `--preview-method auto`, safe kill, memory guard, Ollama) is the
   user-level Claude skill `comfy-local-ops`; the project runbook is `.claude/skills/bear-pipeline`.
 
-## Stage 5 — keychain (CPU, seconds)
-
-`python tools/keychain.py print-ready/<bear>.stl --out print-ready/keychain-<bear>-32mm.stl --scale 0.2 --views`
-scales a validated Stage-3 solid and gives it something to hang from. `--style hole --through head` (the one
-the user chose for a 1 mm stretch cord) bores a `--hole 3.0` mm tunnel through the skull only, found as its own
-island in the slice at `--hole-z 0.86` of the height, stopping inside the gaps to the raised arms; `--style
-torus` fuses a ring (`--hole --tube --plane front|side --sink`), `--style bail` a slab with a drilled hole.
-Strength is the thinnest horizontal section: ring 2.2 mm 7.5 mm², ring 3.0 mm 14 mm², bail 24 mm², skull bore
-~55 mm². Sinking a ring deeper does not help. `--nfc` adds a 1.5 mm riser under the plinth and recesses a 10.5 x 0.8 mm
-NTAG215 sticker pocket into its underside (spec and perimeter rule from `D:\Projects
-fc-bead`). The base stays
-closed: the piece prints solid. `--nfc` adds a 1.5 mm riser under the plinth and recesses a 10.5 x 0.8 mm NTAG215 sticker pocket into its
-underside (spec and the 16-point perimeter rule from D:/Projects/nfc-bead).
-
 ## Stage 4 prep — hollowing (CPU, ~90 s at 160 mm)
 
 `python tools/hollow.py print-ready/<bear>.stl --out print-ready/totem-<bear>-hollow-2mm.stl --wall 2.0 --pitch 0.4 --height 160 --views`
@@ -217,6 +203,37 @@ and the material volume as a filament estimate. Rules learned: for a large print
 bear went from a faceted blob at 0.5/60k/taubin 10 to eyes, teeth and fur ridges); never run a per-body winding fix on the
 shell (it turns the cavity into a second solid), never simplify the assembled shell with a tolerance near
 the wall (the skins cross), and call manifold3d directly for the cut (trimesh's wrapper re-orients skins).
+
+## Stage 5 — charm (CPU, seconds)
+
+`python tools/keychain.py <solid>.stl --out print-ready/keychain-<bear>.stl --scale 0.2 --style hole --through head --hole 3.0 --hole-z 0.86 --nfc --views`
+scales a validated Stage-3 solid and gives it something to hang from, plus a pocket for an NFC sticker.
+
+**Hanging it.** `--style hole --through head` (what the user chose, for a 1 mm stretch cord) bores a
+`--hole` mm tunnel through the skull *only*: the head is found as its own island in the horizontal slice at
+`--hole-z` of the height, and the bore stops inside the gaps to the raised arms so it never pierces them.
+`--style torus` fuses a ring (`--hole --tube --plane front|side --sink`), `--style bail` a slab with a
+drilled hole. Strength is the thinnest horizontal section through the feature: ring at 2.2 mm tube 7.5 mm²,
+at 3.0 mm 14 mm², bail 24 mm², skull bore ~55 mm². **Sinking a ring deeper does not help** — its weak line
+is its own equator, which stays in air because the hole must stay clear for the cord.
+
+**NFC pocket.** `--nfc` first adds a `--riser` under the base outline (the plinth alone is only ~1.8 mm at
+20 % scale), then cuts a pocket for an NTAG215 10 mm sticker. The centre is the point of the base outline
+with the most clearance, found by a 0.25 mm grid search, and it must pass the same 16-point perimeter check
+the bead recipe uses (spec: `D:/Projects/nfc-bead`, `prompts/nfc-bead/prompt.md`). Two modes:
+
+- `--nfc-mode embed` (default) — a **sealed cavity** inside the plinth: `--nfc-floor` of solid below it,
+  `--nfc-depth` of cavity, the rest of the plate above. The log prints the height and layer number to
+  **pause the print** at; you drop the sticker in through the open well and resume, and the next layer
+  bridges over it. Pocket defaults to 11.0 mm because printed holes come out ~0.3 mm small and the sticker
+  goes in by hand, and the cavity is taller than the sticker so the bridge never presses on it.
+- `--nfc-mode open` — a recess in the underside for gluing the sticker in after printing.
+
+Booleans here keep **every** body, including cavity skins, and never run a per-body winding fix (that turns
+a cavity into a second solid). The riser outline is inset 0.1 mm so its wall is never coincident with the
+bear's, which otherwise leaves sliver triangles that manifold3d tolerates but slicers and trimesh reject —
+check the exported STL, not just the in-memory mesh. The base stays closed: the charm prints solid.
+
 
 ## Stage 2 with TRELLIS.2 (finalists)
 

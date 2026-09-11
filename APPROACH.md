@@ -226,6 +226,20 @@ the head and the raised arms, at 86 % of the height where 2.4 mm of crown remain
 material around it, nothing protrudes, invisible from the front. First attempt bored the arms (the bore was
 centred on the paw tips and ran full width) — the fix finds the skull as its own slice island.
 
+**NFC pocket in the plinth.** The charm carries an NTAG215 10 mm sticker, to the spec in the sibling project
+`D:\Projects\nfc-bead` (10.5 × 0.8 mm pocket, ≥ 1 mm wall, 16-point perimeter raycast). The pocket centre is
+chosen automatically as the point of the base outline with the most clearance — on this bear that leaves
+2.5 mm of wall all round, well over the rule. The plinth is only ~1.8 mm thick at 20 % scale, so a riser is
+added under it first; the user wants to **drop the sticker in mid-print**, so the default is a *sealed*
+cavity rather than the bead recipe's open recess: a 3.8 mm plate holding 1.2 mm of floor, a 1.0 mm cavity and
+1.6 mm of plate above the chip, with the pause height (2.2 mm, after layer 11 at 0.2 mm layers) printed in
+the tool's log. The pocket is widened to 11.0 mm because printed holes come out ~0.3 mm small and the sticker
+is placed by hand, and the cavity is taller than the sticker so the bridge over it never presses down.
+Two mesh lessons: manifold3d booleans must keep cavity skins (dropping all but the largest body, or fixing
+winding per body, destroys the pocket), and a riser extruded from the *exact* base outline leaves coincident
+walls whose sliver triangles make the exported STL non-watertight even though the in-memory mesh validates —
+inset the outline 0.1 mm and verify the file on disk.
+
 ## 4. Division of labour (this session)
 
 | Agent | Owns | Delivers |
@@ -272,7 +286,9 @@ keychain stage, and the user's chosen bear (round-4 `b`) delivered in every form
 |---|---|
 | `totem-bear-r4b-TRELLIS-240mm-hollow-2.5mm.stl` | **the Goldrush totem**, 240 mm, high-detail, 2.5 mm wall, ~240 g |
 | `totem-bear-r4b-TRELLIS-160mm-hollow-2mm.stl` | the same at 160 mm, 2 mm wall, ~97 g |
-| `keychain-bear-r4b-TRELLIS-32mm-corded.stl` | 32 mm, 3 mm cord tunnel through the skull |
+| `keychain-bear-r4b-TRELLIS-corded-nfc-embedded.stl` | **the charm**, 34 mm, cord tunnel + a sealed NFC cavity in a 3.8 mm plate (pause at 2.2 mm, insert, resume) |
+| `keychain-bear-r4b-TRELLIS-32mm-corded-nfc.stl` | the same with an open recess underneath, for gluing the sticker in |
+| `keychain-bear-r4b-TRELLIS-32mm-corded.stl` | 32 mm, 3 mm cord tunnel through the skull, no pocket |
 | `bear-r4b-TRELLIS-grizzly-roar-on-rock-160mm.stl` | the validated solid everything above was cut from |
 
 **Next steps, in order.**
